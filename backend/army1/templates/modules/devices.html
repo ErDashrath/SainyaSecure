@@ -1,0 +1,270 @@
+{% extends 'modules/base_module.html' %}
+{% load static %}
+
+{% block title %}Device Management - {{ module_name }}{% endblock %}
+
+{% block module_header %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-primary">{{ module_name }}</h1>
+    <button onclick="openAddDeviceModal()" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+        ADD DEVICE
+    </button>
+</div>
+{% endblock %}
+
+{% block module_content %}
+<div class="grid grid-cols-1 gap-6">
+    <!-- Device Statistics -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">DEVICE STATUS OVERVIEW</h3>
+        <div class="grid grid-cols-4 gap-4 text-center">
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-primary text-xl font-bold">{{ device_stats.total }}</div>
+                <div class="text-gray-300 text-sm">TOTAL DEVICES</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-green-400 text-xl font-bold">{{ device_stats.active }}</div>
+                <div class="text-gray-300 text-sm">ACTIVE</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-yellow-400 text-xl font-bold">{{ device_stats.maintenance }}</div>
+                <div class="text-gray-300 text-sm">MAINTENANCE</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-red-400 text-xl font-bold">{{ device_stats.repair }}</div>
+                <div class="text-gray-300 text-sm">NEEDS REPAIR</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device List -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">DEVICE INVENTORY</h3>
+        
+        {% if devices %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-green-800">
+                        <th class="text-left py-2 text-primary">SERIAL NUMBER</th>
+                        <th class="text-left py-2 text-primary">TYPE</th>
+                        <th class="text-left py-2 text-primary">MODEL</th>
+                        <th class="text-left py-2 text-primary">ASSIGNED TO</th>
+                        <th class="text-left py-2 text-primary">LOCATION</th>
+                        <th class="text-left py-2 text-primary">STATUS</th>
+                        <th class="text-left py-2 text-primary">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr class="border-b border-gray-800 hover:bg-gray-900">
+                        <td class="py-2 text-gray-300 font-mono">{{ device.serial_number }}</td>
+                        <td class="py-2 text-gray-300">
+                            <span class="inline-flex items-center">
+                                {% if device.device_type == 'RADIO' %}
+                                    <i class="fas fa-broadcast-tower text-primary mr-2"></i>
+                                {% elif device.device_type == 'COMPUTER' %}
+                                    <i class="fas fa-desktop text-blue-400 mr-2"></i>
+                                {% elif device.device_type == 'PHONE' %}
+                                    <i class="fas fa-phone text-green-400 mr-2"></i>
+                                {% elif device.device_type == 'VEHICLE' %}
+                                    <i class="fas fa-truck text-yellow-400 mr-2"></i>
+                                {% elif device.device_type == 'WEAPON' %}
+                                    <i class="fas fa-crosshairs text-red-400 mr-2"></i>
+                                {% else %}
+                                    <i class="fas fa-microchip text-gray-400 mr-2"></i>
+                                {% endif %}
+                                {{ device.get_device_type_display }}
+                            </span>
+                        </td>
+                        <td class="py-2 text-gray-300">{{ device.model }}</td>
+                        <td class="py-2 text-gray-300">
+                            {% if device.assigned_to %}
+                                {{ device.assigned_to.first_name }} {{ device.assigned_to.last_name }}
+                            {% else %}
+                                <span class="text-gray-500">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-2 text-gray-300">{{ device.location }}</td>
+                        <td class="py-2">
+                            <span class="px-2 py-1 rounded text-xs 
+                                {% if device.status == 'ACTIVE' %}bg-green-900 text-green-400
+                                {% elif device.status == 'MAINTENANCE' %}bg-yellow-900 text-yellow-400
+                                {% elif device.status == 'REPAIR' %}bg-red-900 text-red-400
+                                {% else %}bg-gray-900 text-gray-400{% endif %}">
+                                {{ device.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-2">
+                            <button onclick="editDevice('{{ device.device_id }}')" class="text-primary hover:text-green-400 mr-2">EDIT</button>
+                            <button onclick="viewDevice('{{ device.device_id }}')" class="text-primary hover:text-green-400">VIEW</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <div class="text-gray-400">No devices registered</div>
+            <button onclick="openAddDeviceModal()" class="mt-4 bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+                ADD FIRST DEVICE
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Device Modal -->
+<div id="addDeviceModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">ADD DEVICE</h3>
+            <button onclick="closeAddDeviceModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_device">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Serial Number</label>
+                    <input type="text" name="serial_number" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Device Type</label>
+                    <select name="device_type" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for type_code, type_display in device_types %}
+                        <option value="{{ type_code }}">{{ type_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Model</label>
+                    <input type="text" name="model" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Status</label>
+                    <select name="status" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for status_code, status_display in status_choices %}
+                        <option value="{{ status_code }}">{{ status_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Location</label>
+                    <input type="text" name="location" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Assigned To</label>
+                    <select name="assigned_to" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        <option value="">Unassigned</option>
+                        {% for person in personnel_list %}
+                        <option value="{{ person.personnel_id }}">{{ person.first_name }} {{ person.last_name }} ({{ person.service_number }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Acquisition Date</label>
+                    <input type="date" name="acquisition_date" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Acquisition Cost</label>
+                    <input type="number" name="acquisition_cost" step="0.01" placeholder="Optional" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Notes</label>
+                <textarea name="notes" rows="3" placeholder="Additional information..." class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeAddDeviceModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">ADD DEVICE</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Quick Actions Panel -->
+<div class="fixed bottom-4 right-4 space-y-2">
+    <button onclick="performDeviceScan()" class="bg-blue-900 hover:bg-blue-800 text-white p-3 rounded-full shadow-lg" title="Scan for Devices">
+        <i class="fas fa-radar"></i>
+    </button>
+    <button onclick="exportDeviceReport()" class="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-full shadow-lg" title="Export Report">
+        <i class="fas fa-download"></i>
+    </button>
+    <button onclick="deviceMaintenance()" class="bg-yellow-900 hover:bg-yellow-800 text-white p-3 rounded-full shadow-lg" title="Maintenance Schedule">
+        <i class="fas fa-wrench"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block module_scripts %}
+<script>
+function openAddDeviceModal() {
+    document.getElementById('addDeviceModal').classList.remove('hidden');
+}
+
+function closeAddDeviceModal() {
+    document.getElementById('addDeviceModal').classList.add('hidden');
+}
+
+function editDevice(deviceId) {
+    alert('Edit device functionality - Device ID: ' + deviceId);
+    // TODO: Implement edit modal
+}
+
+function viewDevice(deviceId) {
+    alert('View device functionality - Device ID: ' + deviceId);
+    // TODO: Implement view modal with full device details
+}
+
+function performDeviceScan() {
+    alert('Device scan initiated - Searching for new devices on network...');
+    // TODO: Implement device discovery
+}
+
+function exportDeviceReport() {
+    alert('Exporting device inventory report...');
+    // TODO: Implement report export
+}
+
+function deviceMaintenance() {
+    alert('Opening maintenance schedule...');
+    // TODO: Implement maintenance scheduling
+}
+
+// Close modal when clicking outside
+document.getElementById('addDeviceModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddDeviceModal();
+    }
+});
+
+// Auto-refresh device status every 30 seconds
+setInterval(function() {
+    // Simulate device status updates
+    const statusElements = document.querySelectorAll('span[class*="bg-green-900"], span[class*="bg-yellow-900"], span[class*="bg-red-900"]');
+    statusElements.forEach(element => {
+        if (Math.random() > 0.95) {
+            element.style.animation = 'pulse 2s ease-in-out';
+            setTimeout(() => {
+                element.style.animation = '';
+            }, 2000);
+        }
+    });
+}, 30000);
+</script>
+{% endblock %}

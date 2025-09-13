@@ -1,0 +1,808 @@
+{% extends 'modules/base_module.html' %}
+
+{% block module_icon %}comments{% endblock %}
+{% block module_icon_large %}comments{% endblock %}
+{% block module_status %}OPERATIONAL{% endblock %}
+
+{% extends 'modules/base_module.html' %}
+
+{% block module_icon %}satellite-dish{% endblock %}
+{% block module_icon_large %}satellite-dish{% endblock %}
+{% block module_status %}🔐 SECURE CHANNEL ACTIVE{% endblock %}
+
+{% block module_content %}
+<!-- Command Communication Header -->
+<div class="battlefield-container p-6 mb-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-satellite-dish text-2xl text-white"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-primary">SECURE MILITARY COMMUNICATION</h2>
+                <p class="text-gray-300">Real-time encrypted messaging • Battlefield coordination • P2P failover</p>
+                <div class="flex items-center gap-4 mt-2">
+                    <span class="text-xs bg-success bg-opacity-20 text-success px-3 py-1 rounded-full">
+                        <i class="fas fa-lock mr-1"></i>ENCRYPTED
+                    </span>
+                    <span class="text-xs bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-full">
+                        <i class="fas fa-users mr-1"></i>{{ active_users|default:12 }} ONLINE
+                    </span>
+                    <span class="text-xs text-gray-400">Last sync: {{ current_time|date:"H:i:s" }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="status-online"></div>
+            <span class="text-sm text-success font-mono">SECURE LINE ESTABLISHED</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Communication Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-8">
+    
+    <!-- Left Panel: Active Channels -->
+    <div class="xl:col-span-1">
+        <div class="battlefield-container p-6 h-full">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                    <i class="fas fa-satellite"></i>
+                    ACTIVE CHANNELS
+                </h3>
+                <button class="control-button px-3 py-1 text-sm" onclick="createNewChannel()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            
+            <!-- Channel List -->
+            <div class="space-y-3">
+                <div class="channel-item active" onclick="switchChannel('command')">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white"># COMMAND-CENTER</div>
+                            <div class="text-xs text-gray-400">8 members • Last: 12:34</div>
+                        </div>
+                        <span class="text-xs bg-danger bg-opacity-20 text-danger px-2 py-1 rounded">3</span>
+                    </div>
+                </div>
+                
+                <div class="channel-item" onclick="switchChannel('operations')">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white"># OPERATIONS</div>
+                            <div class="text-xs text-gray-400">15 members • Last: 12:28</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-item" onclick="switchChannel('intel')">
+                    <div class="flex items-center gap-3">
+                        <div class="status-warning"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white"># INTELLIGENCE</div>
+                            <div class="text-xs text-gray-400">5 members • Last: 11:45</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-item" onclick="switchChannel('emergency')">
+                    <div class="flex items-center gap-3">
+                        <div class="status-danger"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white"># EMERGENCY</div>
+                            <div class="text-xs text-red-400">Priority channel</div>
+                        </div>
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-600 pt-3 mt-4">
+                    <div class="text-xs text-gray-400 mb-3 font-semibold">DIRECT MESSAGES</div>
+                    <div class="space-y-2">
+                        <div class="channel-item p2p" onclick="switchChannel('dm1')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-xs text-white">SM</div>
+                                <div class="flex-1">
+                                    <div class="text-sm text-white">Col. Sarah Mitchell</div>
+                                    <div class="text-xs text-success">P2P Encrypted</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="channel-item" onclick="switchChannel('dm2')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white">DC</div>
+                                <div class="flex-1">
+                                    <div class="text-sm text-white">Maj. David Chen</div>
+                                    <div class="text-xs text-gray-400">Online</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Center Panel: Chat Interface -->
+    <div class="xl:col-span-2">
+        <div class="battlefield-container p-6 flex flex-col h-full">
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-gray-600 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="status-online"></div>
+                    <div>
+                        <h3 class="text-lg font-bold text-primary"># COMMAND-CENTER</h3>
+                        <div class="text-xs text-gray-400">Secure military command channel • 8 active members</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="control-button secondary px-3 py-2 text-sm" onclick="toggleChannelInfo()">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="control-button secondary px-3 py-2 text-sm" onclick="channelSettings()">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div class="flex-1 overflow-y-auto mb-6 military-chat">
+                <div class="space-y-4">
+                    <!-- System Message -->
+                    <div class="chat-message system">
+                        <div class="text-center">
+                            <div class="inline-block bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fas fa-shield-alt text-primary mr-2"></i>
+                                <span class="text-xs text-primary">Secure channel established • End-to-end encryption active</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Database Messages -->
+                    {% for message in recent_messages %}
+                    <div class="chat-message {% if message.priority == 'URGENT' %}urgent{% elif message.priority == 'CLASSIFIED' %}alert{% endif %}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br 
+                                {% if message.sender.rank == 'COMMAND' %}from-green-400 to-blue-500
+                                {% elif message.sender.rank == 'OPERATIONS' %}from-purple-400 to-pink-500
+                                {% elif message.sender.rank == 'INTELLIGENCE' %}from-yellow-400 to-orange-500
+                                {% else %}from-cyan-400 to-blue-500{% endif %}
+                                rounded-full flex items-center justify-center text-white font-bold">
+                                {{ message.sender.rank|slice:":2" }}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-semibold text-white">{{ message.sender.rank|title }} User</span>
+                                    <span class="text-xs 
+                                        {% if message.priority == 'URGENT' %}text-warning
+                                        {% elif message.priority == 'CLASSIFIED' %}text-danger
+                                        {% else %}text-primary{% endif %}">
+                                        {{ message.priority }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">{{ message.timestamp|date:"H:i:s" }}</span>
+                                </div>
+                                <div class="message-content {% if message.priority == 'CLASSIFIED' %}danger{% endif %}">
+                                    {% if message.priority == 'CLASSIFIED' %}🔒 {% endif %}{{ message.content }}
+                                </div>
+                                <div class="message-actions">
+                                    <button class="action-btn" onclick="reactToMessage('thumbsup')">
+                                        <i class="fas fa-thumbs-up"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="replyToMessage()">
+                                        <i class="fas fa-reply"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="shareMessage()">
+                                        <i class="fas fa-share"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-8">
+                        <div class="text-gray-400 mb-4">No messages yet</div>
+                        <div class="text-sm text-primary">Send the first message to start secure communications</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Message Input -->
+            <div class="message-input-container">
+                <form method="post" class="space-y-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_message">
+                    
+                    <div class="flex gap-3">
+                        <div class="flex-1 relative">
+                            <input type="text" name="message_content" id="messageInput" required
+                                   placeholder="Type secure message... (use # for channels, @ for mentions)"
+                                   class="w-full bg-gray-800 border border-primary rounded-lg px-4 py-3 text-white font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                                   maxlength="500">
+                            <div class="absolute bottom-2 right-3 text-xs text-gray-400">
+                                <span id="charCount">0</span>/500
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="control-button secondary" onclick="attachFile()" title="Attach File">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button type="button" class="control-button secondary" onclick="toggleEncryption()" title="Toggle P2P Encryption">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button type="submit" class="control-button" title="Send Message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Message Type Selector -->
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs text-gray-400">Message Type:</span>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="message_type" value="ROUTINE" checked class="text-primary">
+                            <span class="text-xs text-white">ROUTINE</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="message_type" value="URGENT" class="text-warning">
+                            <span class="text-xs text-warning">URGENT</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="message_type" value="CLASSIFIED" class="text-danger">
+                            <span class="text-xs text-danger">CLASSIFIED</span>
+                        </label>
+                        <div class="ml-auto">
+                            <select name="channel" class="bg-gray-800 border border-primary text-white px-2 py-1 rounded text-xs">
+                                <option value="COMMAND-CENTER">COMMAND-CENTER</option>
+                                <option value="OPERATIONS">OPERATIONS</option>
+                                <option value="INTELLIGENCE">INTELLIGENCE</option>
+                                <option value="EMERGENCY">EMERGENCY</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Panel: Channel Info & Stats -->
+    <div class="xl:col-span-1">
+        <div class="space-y-6">
+            
+            <!-- Channel Members -->
+            <div class="battlefield-container p-6">
+                <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                    <i class="fas fa-users"></i>
+                    CHANNEL MEMBERS (8)
+                </h4>
+                
+                <div class="space-y-3">
+                    <div class="member-item">
+                        <div class="flex items-center gap-3">
+                            <div class="status-online"></div>
+                            <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">SM</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-white">Col. Sarah Mitchell</div>
+                                <div class="text-xs text-gray-400">Command • Online</div>
+                            </div>
+                            <i class="fas fa-crown text-warning" title="Channel Admin"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="member-item">
+                        <div class="flex items-center gap-3">
+                            <div class="status-online"></div>
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">DC</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-white">Maj. David Chen</div>
+                                <div class="text-xs text-gray-400">Operations • Online</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="member-item">
+                        <div class="flex items-center gap-3">
+                            <div class="status-warning"></div>
+                            <div class="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">JT</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-white">Lt. Jennifer Torres</div>
+                                <div class="text-xs text-yellow-400">Intelligence • P2P Mode</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="member-item">
+                        <div class="flex items-center gap-3">
+                            <div class="status-offline"></div>
+                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">RK</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-gray-400">Capt. Robert Kim</div>
+                                <div class="text-xs text-gray-500">Field • Offline (2h ago)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button class="control-button secondary w-full" onclick="showAllMembers()">
+                            <i class="fas fa-users mr-2"></i>
+                            View All Members
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message Statistics -->
+            <div class="battlefield-container p-6">
+                <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-bar"></i>
+                    MESSAGE ANALYTICS
+                </h4>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-gray-800 bg-opacity-50 rounded">
+                        <span class="text-sm text-gray-300">Today</span>
+                        <span class="text-lg font-bold text-primary">247</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-800 bg-opacity-50 rounded">
+                        <span class="text-sm text-gray-300">This Week</span>
+                        <span class="text-lg font-bold text-success">1,834</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-800 bg-opacity-50 rounded">
+                        <span class="text-sm text-gray-300">Urgent</span>
+                        <span class="text-lg font-bold text-warning">12</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-800 bg-opacity-50 rounded">
+                        <span class="text-sm text-gray-300">Classified</span>
+                        <span class="text-lg font-bold text-danger">3</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Channel Actions -->
+            <div class="battlefield-container p-6">
+                <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                    <i class="fas fa-bolt"></i>
+                    QUICK ACTIONS
+                </h4>
+                
+                <div class="space-y-3">
+                    <button class="control-button w-full" onclick="broadcastMessage()">
+                        <i class="fas fa-bullhorn mr-2"></i>
+                        BROADCAST ALERT
+                    </button>
+                    <button class="control-button secondary w-full" onclick="exportChat()">
+                        <i class="fas fa-download mr-2"></i>
+                        EXPORT CHAT LOG
+                    </button>
+                    <button class="control-button warning w-full" onclick="emergencyProtocol()">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        EMERGENCY MODE
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block module_actions %}
+<!-- Enhanced Military Communication Tools -->
+<div class="space-y-6">
+    
+    <!-- P2P Encryption Control -->
+    <div class="military-card p-6 text-center border-2 border-success">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-shield-alt text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">P2P SECURE MODE</h4>
+        <p class="text-sm text-gray-400 mb-4">End-to-end encrypted direct communication bypassing central servers</p>
+        <div class="space-y-2">
+            <button class="control-button w-full" onclick="enableP2PMode()">
+                <i class="fas fa-lock mr-2"></i>
+                ACTIVATE P2P
+            </button>
+            <div class="text-xs text-success">
+                <i class="fas fa-check-circle mr-1"></i>
+                Available for emergency scenarios
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast System -->
+    <div class="military-card p-6 text-center border-2 border-warning">
+        <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-broadcast-tower text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">MASS BROADCAST</h4>
+        <p class="text-sm text-gray-400 mb-4">Send priority alerts to all units simultaneously</p>
+        <div class="space-y-2">
+            <button class="control-button warning w-full" onclick="openBroadcastModal()">
+                <i class="fas fa-bullhorn mr-2"></i>
+                BROADCAST ALERT
+            </button>
+            <div class="text-xs text-warning">
+                <i class="fas fa-users mr-1"></i>
+                Reaches all {{ total_personnel|default:47 }} personnel
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel Management -->
+    <div class="military-card p-6 text-center border-2 border-info">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-satellite-dish text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">CHANNEL CONTROL</h4>
+        <p class="text-sm text-gray-400 mb-4">Create and manage secure communication channels</p>
+        <div class="space-y-2">
+            <button class="control-button info w-full" onclick="createSecureChannel()">
+                <i class="fas fa-plus mr-2"></i>
+                NEW CHANNEL
+            </button>
+            <div class="text-xs text-info">
+                <i class="fas fa-hashtag mr-1"></i>
+                {{ active_channels|default:12 }} channels active
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Protocol -->
+    <div class="military-card p-6 text-center border-2 border-danger">
+        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">EMERGENCY MODE</h4>
+        <p class="text-sm text-gray-400 mb-4">Activate emergency communication protocols</p>
+        <div class="space-y-2">
+            <button class="control-button danger w-full" onclick="activateEmergencyMode()">
+                <i class="fas fa-fire mr-2"></i>
+                EMERGENCY ALERT
+            </button>
+            <div class="text-xs text-danger">
+                <i class="fas fa-bolt mr-1"></i>
+                Priority override enabled
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Analytics -->
+    <div class="military-card p-6 text-center border-2 border-primary">
+        <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chart-line text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">MESSAGE ANALYTICS</h4>
+        <p class="text-sm text-gray-400 mb-4">View communication patterns and metrics</p>
+        <div class="space-y-2">
+            <button class="control-button w-full" onclick="viewAnalytics()">
+                <i class="fas fa-chart-bar mr-2"></i>
+                VIEW REPORTS
+            </button>
+            <div class="text-xs text-primary">
+                <i class="fas fa-clock mr-1"></i>
+                Last updated: {{ current_time|date:"H:i" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- File Transfer -->
+    <div class="military-card p-6 text-center border-2 border-secondary">
+        <div class="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-file-shield text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">SECURE TRANSFER</h4>
+        <p class="text-sm text-gray-400 mb-4">Encrypted file sharing with verification</p>
+        <div class="space-y-2">
+            <button class="control-button secondary w-full" onclick="openFileTransfer()">
+                <i class="fas fa-upload mr-2"></i>
+                SEND FILES
+            </button>
+            <div class="text-xs text-gray-400">
+                <i class="fas fa-shield-alt mr-1"></i>
+                AES-256 encryption
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+// Enhanced Military Messaging JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMessaging();
+    setupMessageInput();
+    startRealTimeUpdates();
+});
+
+function initializeMessaging() {
+    // Initialize channel switching
+    const channels = document.querySelectorAll('.channel-item');
+    channels.forEach(channel => {
+        channel.addEventListener('click', function() {
+            channels.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Initialize message reactions
+    setupMessageReactions();
+}
+
+function setupMessageInput() {
+    const input = document.getElementById('messageInput');
+    const charCount = document.getElementById('charCount');
+    
+    if (input && charCount) {
+        input.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            
+            // Color coding for character count
+            if (this.value.length > 400) {
+                charCount.className = 'text-danger';
+            } else if (this.value.length > 300) {
+                charCount.className = 'text-warning';
+            } else {
+                charCount.className = 'text-gray-400';
+            }
+        });
+        
+        // Send message on Enter
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+}
+
+function startRealTimeUpdates() {
+    // Simulate real-time message updates
+    setInterval(() => {
+        updateOnlineStatus();
+        checkForNewMessages();
+    }, 5000);
+    
+    // Update time stamps
+    setInterval(updateTimestamps, 60000);
+}
+
+function switchChannel(channelId) {
+    console.log(`Switching to channel: ${channelId}`);
+    // Would implement actual channel switching logic
+    updateChannelHeader(channelId);
+    loadChannelMessages(channelId);
+}
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (message) {
+        const messageType = document.querySelector('input[name="messageType"]:checked').value;
+        addMessageToChat(message, 'You', messageType);
+        input.value = '';
+        document.getElementById('charCount').textContent = '0';
+        
+        // Simulate response
+        setTimeout(() => {
+            simulateResponse(message);
+        }, 1000 + Math.random() * 2000);
+    }
+}
+
+function addMessageToChat(message, sender, type = 'normal') {
+    const chatContainer = document.querySelector('.military-chat .space-y-4');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message';
+    
+    if (type === 'urgent') messageDiv.classList.add('urgent');
+    if (type === 'classified') messageDiv.classList.add('classified');
+    
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+    
+    let typeLabel = 'USER';
+    let typeClass = 'text-primary';
+    if (type === 'urgent') {
+        typeLabel = 'URGENT';
+        typeClass = 'text-warning';
+    } else if (type === 'classified') {
+        typeLabel = 'CLASSIFIED';
+        typeClass = 'text-danger';
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                ${sender.charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="font-semibold text-white">${sender}</span>
+                    <span class="text-xs ${typeClass}">${typeLabel}</span>
+                    <span class="text-xs text-gray-400">${timeStr}</span>
+                </div>
+                <div class="message-content">
+                    ${message}
+                </div>
+                <div class="message-actions">
+                    <button class="action-btn" onclick="reactToMessage('thumbsup')">
+                        <i class="fas fa-thumbs-up"></i>
+                    </button>
+                    <button class="action-btn" onclick="replyToMessage()">
+                        <i class="fas fa-reply"></i>
+                    </button>
+                    <button class="action-btn" onclick="shareMessage()">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    chatContainer.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    const chatContainer2 = document.querySelector('.military-chat');
+    chatContainer2.scrollTop = chatContainer2.scrollHeight;
+    
+    // Remove old messages if too many
+    const messages = chatContainer.querySelectorAll('.chat-message');
+    if (messages.length > 20) {
+        messages[0].remove();
+    }
+}
+
+function simulateResponse(originalMessage) {
+    const responses = [
+        'Message received and acknowledged.',
+        'Roger that, standing by.',
+        'Copy that, will proceed as instructed.',
+        'Understood, maintaining current position.',
+        'Confirmed, all systems operational.',
+        'Affirmative, mission parameters updated.'
+    ];
+    
+    const response = responses[Math.floor(Math.random() * responses.length)];
+    addMessageToChat(response, 'Command Center', 'normal');
+}
+
+function updateOnlineStatus() {
+    const statusElements = document.querySelectorAll('.status-online, .status-warning, .status-offline');
+    statusElements.forEach(status => {
+        // Randomly simulate status changes
+        if (Math.random() > 0.95) {
+            status.style.animation = 'pulse 1s ease-in-out';
+            setTimeout(() => {
+                status.style.animation = '';
+            }, 1000);
+        }
+    });
+}
+
+function checkForNewMessages() {
+    // Simulate new message notifications
+    if (Math.random() > 0.9) {
+        const senders = ['Alpha-1', 'Bravo-2', 'Charlie-3', 'Delta-4'];
+        const messages = [
+            'Patrol report: All clear in sector 7.',
+            'Equipment check complete, all green.',
+            'Requesting permission to advance to next waypoint.',
+            'Contact established with local command.',
+            'Weather conditions optimal for mission.'
+        ];
+        
+        const sender = senders[Math.floor(Math.random() * senders.length)];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        
+        addMessageToChat(message, sender, 'normal');
+    }
+}
+
+function updateTimestamps() {
+    const timestamps = document.querySelectorAll('.chat-message .text-xs.text-gray-400');
+    // Would update relative timestamps here
+}
+
+// Action Functions
+function createNewChannel() {
+    console.log('Creating new secure channel...');
+    // Would open channel creation modal
+}
+
+function toggleChannelInfo() {
+    console.log('Toggling channel information panel...');
+}
+
+function channelSettings() {
+    console.log('Opening channel settings...');
+}
+
+function reactToMessage(reaction) {
+    console.log(`Reacting with: ${reaction}`);
+}
+
+function replyToMessage() {
+    console.log('Replying to message...');
+}
+
+function shareMessage() {
+    console.log('Sharing message...');
+}
+
+function attachFile() {
+    console.log('Opening file attachment dialog...');
+}
+
+function toggleEncryption() {
+    console.log('Toggling P2P encryption...');
+    // Visual feedback for encryption toggle
+    const button = event.target.closest('button');
+    button.classList.toggle('bg-success');
+}
+
+function broadcastMessage() {
+    console.log('Opening broadcast message dialog...');
+}
+
+function exportChat() {
+    console.log('Exporting chat log...');
+}
+
+function emergencyProtocol() {
+    console.log('Activating emergency protocols...');
+    document.body.style.animation = 'emergency-flash 2s ease-in-out';
+    setTimeout(() => {
+        document.body.style.animation = '';
+    }, 2000);
+}
+
+function showAllMembers() {
+    console.log('Showing all channel members...');
+}
+
+function enableP2PMode() {
+    console.log('Enabling P2P secure mode...');
+}
+
+function openBroadcastModal() {
+    console.log('Opening broadcast modal...');
+}
+
+function createSecureChannel() {
+    console.log('Creating new secure channel...');
+}
+
+function activateEmergencyMode() {
+    console.log('Activating emergency mode...');
+    emergencyProtocol();
+}
+
+function viewAnalytics() {
+    console.log('Opening message analytics...');
+}
+
+function openFileTransfer() {
+    console.log('Opening secure file transfer...');
+}
+
+// Message reactions setup
+function setupMessageReactions() {
+    const reactions = document.querySelectorAll('.reaction');
+    reactions.forEach(reaction => {
+        reaction.addEventListener('click', function() {
+            this.style.backgroundColor = 'rgba(0, 255, 136, 0.2)';
+            setTimeout(() => {
+                this.style.backgroundColor = '';
+            }, 200);
+        });
+    });
+}
+</script>
+{% endblock %}

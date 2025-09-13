@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Device Registration - SainyaSecure{% endblock %}
+
+{% block content %}
+<div class="military-gradient min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-container">
+            <div class="nav-container flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-white text-xl">Device Registration</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'dashboard' %}" class="text-slate-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:bg-slate-700/50">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-container py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="logo-container inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-full mb-6 shadow-2xl glow-effect">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            
+            <h1 class="hero-title font-bold text-white mb-4 bg-gradient-to-r from-orange-400 via-red-500 to-pink-600 bg-clip-text text-transparent">
+                Device Registration Portal
+            </h1>
+            
+            <p class="hero-subtitle text-slate-300 mb-4">
+                Authority-Approved Device Joining System
+            </p>
+            <p class="text-slate-400 max-w-2xl mx-auto">
+                Register new military devices for secure network access. All devices must be approved by command authority before joining the secure communication network.
+            </p>
+        </div>
+
+        <!-- Registration Process -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Process Steps -->
+            <div class="mb-12">
+                <ul class="steps steps-horizontal w-full text-xs">
+                    <li class="step step-primary">Device Info</li>
+                    <li class="step step-primary">Security Check</li>
+                    <li class="step step-primary">Authority Review</li>
+                    <li class="step">Network Access</li>
+                </ul>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Device Registration Form -->
+                <div class="card bg-slate-800/40 border border-slate-700 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-white mb-6 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Device Registration
+                        </h2>
+
+                        <form class="space-y-6">
+                            <!-- Device Type -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Device Type</span>
+                                </label>
+                                <select class="select select-bordered bg-slate-700/50 border-slate-600 text-white focus:border-orange-500 transition-all duration-300">
+                                    <option disabled selected>Select device type</option>
+                                    <option>Field Radio Unit</option>
+                                    <option>Command Post Terminal</option>
+                                    <option>Mobile Communication Device</option>
+                                    <option>Tactical Computer</option>
+                                    <option>Secure Tablet</option>
+                                    <option>Satellite Phone</option>
+                                </select>
+                            </div>
+
+                            <!-- Device ID -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Device Serial Number</span>
+                                </label>
+                                <input type="text" placeholder="Enter device serial number" 
+                                       class="input input-bordered bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-orange-500 transition-all duration-300" required>
+                            </div>
+
+                            <!-- Unit Assignment -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Military Unit</span>
+                                </label>
+                                <select class="select select-bordered bg-slate-700/50 border-slate-600 text-white focus:border-orange-500 transition-all duration-300">
+                                    <option disabled selected>Select your unit</option>
+                                    <option>Alpha Company</option>
+                                    <option>Bravo Company</option>
+                                    <option>Charlie Company</option>
+                                    <option>Delta Company</option>
+                                    <option>Command HQ</option>
+                                    <option>Intelligence Division</option>
+                                </select>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Deployment Location</span>
+                                </label>
+                                <input type="text" placeholder="Current deployment location" 
+                                       class="input input-bordered bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-orange-500 transition-all duration-300" required>
+                            </div>
+
+                            <!-- Requesting Officer -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Requesting Officer</span>
+                                </label>
+                                <input type="text" placeholder="Officer name and rank" 
+                                       class="input input-bordered bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-orange-500 transition-all duration-300" required>
+                            </div>
+
+                            <!-- Security Clearance -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Security Clearance Level</span>
+                                </label>
+                                <select class="select select-bordered bg-slate-700/50 border-slate-600 text-white focus:border-orange-500 transition-all duration-300">
+                                    <option disabled selected>Select clearance level</option>
+                                    <option>CONFIDENTIAL</option>
+                                    <option>SECRET</option>
+                                    <option>TOP SECRET</option>
+                                    <option>TOP SECRET/SCI</option>
+                                </select>
+                            </div>
+
+                            <!-- Purpose -->
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text text-slate-300 font-medium">Purpose of Request</span>
+                                </label>
+                                <textarea class="textarea textarea-bordered bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 focus:border-orange-500 transition-all duration-300" 
+                                          placeholder="Describe the operational purpose for this device" rows="3" required></textarea>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-control mt-8">
+                                <button type="submit" class="btn btn-primary btn-lg bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 border-none shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                    </svg>
+                                    Submit Registration Request
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Information Panel -->
+                <div class="space-y-6">
+                    <!-- Registration Status -->
+                    <div class="card bg-slate-800/40 border border-slate-700 shadow-xl">
+                        <div class="card-body">
+                            <h3 class="card-title text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Registration Requirements
+                            </h3>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-slate-300 text-sm">Valid military identification</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-slate-300 text-sm">Appropriate security clearance</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-slate-300 text-sm">Command authority approval</span>
+                                </div>
+                                <div class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-slate-300 text-sm">Device security certification</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Approvals -->
+                    <div class="card bg-slate-800/40 border border-slate-700 shadow-xl">
+                        <div class="card-body">
+                            <h3 class="card-title text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Pending Approvals
+                            </h3>
+                            
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                                    <div>
+                                        <p class="text-white text-sm font-medium">Field Radio MX-447</p>
+                                        <p class="text-slate-400 text-xs">Alpha Company - 2 days ago</p>
+                                    </div>
+                                    <div class="badge badge-warning badge-sm">PENDING</div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                                    <div>
+                                        <p class="text-white text-sm font-medium">Tactical Tablet TB-892</p>
+                                        <p class="text-slate-400 text-xs">Command HQ - 1 day ago</p>
+                                    </div>
+                                    <div class="badge badge-info badge-sm">REVIEW</div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                                    <div>
+                                        <p class="text-white text-sm font-medium">Secure Phone SP-334</p>
+                                        <p class="text-slate-400 text-xs">Bravo Company - 3 hours ago</p>
+                                    </div>
+                                    <div class="badge badge-success badge-sm">APPROVED</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Notice -->
+                    <div class="alert alert-warning bg-amber-900/30 border-amber-600/50 text-amber-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <div>
+                            <h3 class="font-bold">Security Notice</h3>
+                            <div class="text-xs">All device registration requests are logged and reviewed by security personnel. False information may result in disciplinary action.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-slate-800/30 backdrop-blur-sm border-t border-slate-700 py-8 mt-12">
+        <div class="max-container">
+            <div class="text-center">
+                <p class="text-slate-400 text-sm mb-4">
+                    Device Registration Portal • Military Communication Network
+                </p>
+                <div class="flex flex-wrap justify-center gap-2 text-xs">
+                    <div class="badge badge-outline badge-sm text-orange-400 border-orange-600">Authority Controlled</div>
+                    <div class="badge badge-outline badge-sm text-red-400 border-red-600">Secure Registration</div>
+                    <div class="badge badge-outline badge-sm text-blue-400 border-blue-600">Verified Access</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends 'base_new.html' %}
+
+{% block title %}SainyaSecure - Military Command Center{% endblock %}
+{% block page_title %}Military Command Center{% endblock %}
+
+{% block classification_banner %}
+<!-- Override for landing page - no classification banner -->
+{% endblock %}
+
+{% block content %}
+<!-- Override layout for landing page -->
+</main>
+
+<!-- Landing page with full-screen layout -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex">
+    <!-- Left Side - Hero Content -->
+    <div class="flex-1 flex items-center justify-center p-8">
+        <div class="max-w-2xl text-center">
+            <!-- Logo -->
+            <div class="mb-8">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center mb-4 shadow-2xl">
+                    <i class="fas fa-shield-alt text-4xl text-white"></i>
+                </div>
+                <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 mb-2">
+                    SainyaSecure
+                </h1>
+                <p class="text-xl text-gray-300 font-semibold">Advanced Military Communication System</p>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-12">
+                <p class="text-lg text-gray-300 leading-relaxed mb-6">
+                    Next-generation secure communication platform designed for modern military operations. 
+                    Features end-to-end encryption, blockchain security, AI-powered threat detection, 
+                    and real-time device management.
+                </p>
+                
+                <!-- Key Features -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-lg p-4 text-center">
+                        <i class="fas fa-lock text-green-400 text-2xl mb-2"></i>
+                        <div class="text-sm text-gray-300 font-semibold">End-to-End<br>Encryption</div>
+                    </div>
+                    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-lg p-4 text-center">
+                        <i class="fas fa-brain text-purple-400 text-2xl mb-2"></i>
+                        <div class="text-sm text-gray-300 font-semibold">AI-Powered<br>Security</div>
+                    </div>
+                    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-lg p-4 text-center">
+                        <i class="fas fa-link text-blue-400 text-2xl mb-2"></i>
+                        <div class="text-sm text-gray-300 font-semibold">Blockchain<br>Integration</div>
+                    </div>
+                    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600 rounded-lg p-4 text-center">
+                        <i class="fas fa-sync text-orange-400 text-2xl mb-2"></i>
+                        <div class="text-sm text-gray-300 font-semibold">Real-time<br>Sync</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <a href="{% url 'login' %}" class="btn btn-military btn-lg px-8">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Access Secure Portal
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-lg px-8">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    View Command Center
+                </a>
+            </div>
+
+            <!-- System Status -->
+            <div class="bg-gray-800/30 backdrop-blur-sm border border-gray-600 rounded-lg p-4">
+                <div class="flex items-center justify-center gap-6 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="status-online"></span>
+                        <span class="text-gray-300">System Status: <span class="text-green-400 font-semibold">OPERATIONAL</span></span>
+                    </div>
+                    <div class="text-gray-300">
+                        Security Level: <span class="text-blue-400 font-semibold">MAXIMUM</span>
+                    </div>
+                    <div class="text-gray-300">
+                        Active Units: <span class="text-purple-400 font-semibold">2,847</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side - Login Panel -->
+    <div class="w-96 bg-gray-800/80 backdrop-blur-sm border-l border-gray-600 p-8 flex flex-col">
+        <!-- Quick Login -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-white mb-2">Quick Access</h2>
+            <p class="text-sm text-gray-400">Authorized personnel only</p>
+        </div>
+
+        <!-- Login Form -->
+        <form method="post" action="{% url 'login' %}" class="space-y-4 mb-8">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Military ID</label>
+                <input type="text" name="username" class="input w-full bg-gray-700 border-gray-600 focus:border-green-400" 
+                       placeholder="Enter military ID" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">Secure Password</label>
+                <input type="password" name="password" class="input w-full bg-gray-700 border-gray-600 focus:border-green-400" 
+                       placeholder="Enter password" required>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-300 mb-2">2FA Code (Optional)</label>
+                <input type="text" name="otp_code" class="input w-full bg-gray-700 border-gray-600 focus:border-green-400" 
+                       placeholder="000000">
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" name="remember_me" class="checkbox checkbox-sm">
+                <span class="text-sm text-gray-300">Remember this device</span>
+            </div>
+            <button type="submit" class="btn btn-military w-full">
+                <i class="fas fa-shield-alt mr-2"></i>
+                SECURE LOGIN
+            </button>
+        </form>
+
+        <!-- System Information -->
+        <div class="bg-gray-700/50 rounded-lg p-4 mb-8">
+            <h3 class="text-lg font-bold text-white mb-3">System Overview</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Active Personnel:</span>
+                    <span class="text-green-400 font-semibold">2,847</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Security Score:</span>
+                    <span class="text-blue-400 font-semibold">98.5%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Messages Today:</span>
+                    <span class="text-purple-400 font-semibold">1.2M</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Response Time:</span>
+                    <span class="text-orange-400 font-semibold">0.3s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+            <h4 class="text-red-400 font-bold mb-2">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Emergency Contact
+            </h4>
+            <p class="text-sm text-red-300">
+                For system emergencies or security breaches:
+            </p>
+            <p class="text-red-400 font-bold text-lg mt-1">
+                +1 (800) SECURE-1
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-auto pt-8">
+            <div class="text-center text-xs text-gray-500">
+                <p class="mb-2">
+                    <i class="fas fa-lock mr-1"></i>
+                    CLASSIFIED SYSTEM - TOP SECRET/SCI
+                </p>
+                <p>SainyaSecure v2.4.1 • Build 20241215</p>
+                <p>© 2025 Military Communications Division</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="bg-gray-900 py-20">
+    <div class="max-w-7xl mx-auto px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-white mb-4">Advanced Military Capabilities</h2>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                Comprehensive suite of secure communication tools designed for modern military operations
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Secure Communications -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-comments text-3xl text-blue-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Secure Communications</h3>
+                <p class="text-gray-400 mb-6">
+                    Military-grade encrypted messaging with end-to-end security protocols. 
+                    Real-time communication for field operations with quantum-resistant encryption.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">AES-256</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">RSA-4096</span>
+                    <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">Real-time</span>
+                </div>
+            </div>
+
+            <!-- AI Security -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-brain text-3xl text-purple-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">AI Threat Detection</h3>
+                <p class="text-gray-400 mb-6">
+                    Advanced AI algorithms for real-time anomaly detection and threat assessment. 
+                    Machine learning-powered security monitoring with predictive analysis.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">TensorFlow</span>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">Neural Networks</span>
+                    <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">Real-time</span>
+                </div>
+            </div>
+
+            <!-- Blockchain Security -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-link text-3xl text-green-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Blockchain Security</h3>
+                <p class="text-gray-400 mb-6">
+                    Immutable transaction records with distributed ledger technology. 
+                    Enhanced data integrity and tamper-proof audit trails for critical operations.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Ethereum</span>
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Smart Contracts</span>
+                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Immutable</span>
+                </div>
+            </div>
+
+            <!-- Device Management -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-mobile-alt text-3xl text-orange-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Device Management</h3>
+                <p class="text-gray-400 mb-6">
+                    Centralized device control and monitoring with remote management capabilities. 
+                    Real-time status updates, security enforcement, and fleet tracking.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs">MDM</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs">Remote Control</span>
+                    <span class="px-3 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs">Fleet Tracking</span>
+                </div>
+            </div>
+
+            <!-- P2P Synchronization -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-teal-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-sync text-3xl text-teal-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">P2P Synchronization</h3>
+                <p class="text-gray-400 mb-6">
+                    Distributed peer-to-peer data synchronization with mesh networking. 
+                    Resilient network architecture for mission-critical communications.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs">WebRTC</span>
+                    <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs">Mesh Network</span>
+                    <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs">Distributed</span>
+                </div>
+            </div>
+
+            <!-- Command Center -->
+            <div class="military-card p-8 text-center group">
+                <div class="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-tachometer-alt text-3xl text-red-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Command Center</h3>
+                <p class="text-gray-400 mb-6">
+                    Comprehensive operations dashboard with real-time analytics and strategic overview. 
+                    Tactical control interface with mission planning and execution tools.
+                </p>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs">Real-time Analytics</span>
+                    <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs">Mission Control</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="main-content">
+<!-- Resume normal layout -->
+{% endblock %}

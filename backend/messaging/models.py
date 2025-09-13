@@ -13,7 +13,7 @@ from django.db import models
 from django.utils import timezone
 from users.models import MilitaryUser, Device
 import uuid
-import hashlib
+from utils.military_crypto import military_blockchain
 
 
 class Conversation(models.Model):
@@ -195,8 +195,8 @@ class Message(models.Model):
         self.conversation.save(update_fields=['last_message_at'])
     
     def generate_content_hash(self, content):
-        """Generate SHA-256 hash of message content"""
-        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        """Generate SHA-256 hash of message content using military crypto utilities"""
+        return military_blockchain.calculate_block_hash({'content': content})
     
     def is_expired(self):
         """Check if message has expired"""

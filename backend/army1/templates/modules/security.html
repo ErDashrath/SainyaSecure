@@ -1,0 +1,321 @@
+{% extends 'modules/base_module.html' %}
+{% load static %}
+
+{% block title %}Security Center - {{ module_name }}{% endblock %}
+
+{% block module_header %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-primary">{{ module_name }}</h1>
+    <div class="flex gap-2">
+        <button onclick="openCreateEventModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold">
+            LOG INCIDENT
+        </button>
+        <button onclick="refreshSecurityData()" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+            REFRESH
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_content %}
+<div class="grid grid-cols-1 gap-6">
+    <!-- Security Status Dashboard -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">SECURITY STATUS BOARD</h3>
+        <div class="grid grid-cols-4 gap-4 text-center">
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-primary text-xl font-bold">{{ security_stats.total }}</div>
+                <div class="text-gray-300 text-sm">TOTAL EVENTS</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-yellow-800">
+                <div class="text-yellow-400 text-xl font-bold">{{ security_stats.unresolved }}</div>
+                <div class="text-gray-300 text-sm">UNRESOLVED</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-red-800">
+                <div class="text-red-400 text-xl font-bold">{{ security_stats.critical }}</div>
+                <div class="text-gray-300 text-sm">CRITICAL</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-orange-800">
+                <div class="text-orange-400 text-xl font-bold">{{ security_stats.violations_24h }}</div>
+                <div class="text-gray-300 text-sm">VIOLATIONS (24H)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">EVENT FILTERS</h3>
+        <div class="flex gap-4 flex-wrap">
+            <div>
+                <label class="block text-primary text-sm font-bold mb-1">Severity</label>
+                <select id="severityFilter" onchange="applyFilters()" class="bg-gray-800 border border-green-800 text-white p-2 rounded">
+                    <option value="">All Severities</option>
+                    {% for severity_code, severity_display in severity_levels %}
+                    <option value="{{ severity_code }}" {% if current_severity_filter == severity_code %}selected{% endif %}>{{ severity_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-primary text-sm font-bold mb-1">Status</label>
+                <select id="resolvedFilter" onchange="applyFilters()" class="bg-gray-800 border border-green-800 text-white p-2 rounded">
+                    <option value="">All Events</option>
+                    <option value="unresolved" {% if current_resolved_filter == 'unresolved' %}selected{% endif %}>Unresolved Only</option>
+                    <option value="resolved" {% if current_resolved_filter == 'resolved' %}selected{% endif %}>Resolved Only</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Events Log -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">SECURITY EVENTS LOG</h3>
+        
+        {% if events %}
+        <div class="space-y-3">
+            {% for event in events %}
+            <div class="bg-gray-900 border 
+                {% if event.severity == 'CRITICAL' %}border-red-600
+                {% elif event.severity == 'HIGH' %}border-orange-600
+                {% elif event.severity == 'MEDIUM' %}border-yellow-600
+                {% else %}border-gray-700{% endif %}
+                rounded-lg p-4 hover:border-primary transition-colors">
+                
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-2 py-1 rounded text-xs font-bold 
+                                {% if event.severity == 'CRITICAL' %}bg-red-900 text-red-300
+                                {% elif event.severity == 'HIGH' %}bg-orange-900 text-orange-300
+                                {% elif event.severity == 'MEDIUM' %}bg-yellow-900 text-yellow-300
+                                {% else %}bg-gray-800 text-gray-300{% endif %}">
+                                {{ event.get_severity_display }}
+                            </span>
+                            <span class="px-2 py-1 rounded text-xs font-bold bg-blue-900 text-blue-300">
+                                {{ event.get_event_type_display }}
+                            </span>
+                            {% if event.resolved %}
+                            <span class="px-2 py-1 rounded text-xs font-bold bg-green-900 text-green-300">
+                                RESOLVED
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-1 rounded text-xs font-bold bg-red-900 text-red-300">
+                                ACTIVE
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-white font-semibold mb-1">{{ event.description }}</div>
+                        <div class="flex items-center gap-4 text-xs text-gray-400">
+                            <span><i class="fas fa-user mr-1"></i>User: {{ event.user.username }}</span>
+                            <span><i class="fas fa-clock mr-1"></i>{{ event.timestamp|date:"M d, Y H:i:s" }}</span>
+                            {% if event.ip_address %}
+                            <span><i class="fas fa-globe mr-1"></i>IP: {{ event.ip_address }}</span>
+                            {% endif %}
+                            {% if event.module_accessed %}
+                            <span><i class="fas fa-module mr-1"></i>Module: {{ event.module_accessed }}</span>
+                            {% endif %}
+                        </div>
+                        {% if event.resolved %}
+                        <div class="text-xs text-green-400 mt-1">
+                            <i class="fas fa-check mr-1"></i>Resolved by {{ event.resolved_by.username }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex gap-2">
+                        {% if not event.resolved %}
+                        <button onclick="resolveEvent('{{ event.event_id }}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
+                            RESOLVE
+                        </button>
+                        {% endif %}
+                        <button onclick="viewEventDetails('{{ event.event_id }}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
+                            DETAILS
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Event Severity Indicator -->
+                <div class="w-full bg-gray-800 rounded-full h-1 mt-2">
+                    <div class="h-1 rounded-full 
+                        {% if event.severity == 'CRITICAL' %}bg-red-600
+                        {% elif event.severity == 'HIGH' %}bg-orange-600
+                        {% elif event.severity == 'MEDIUM' %}bg-yellow-600
+                        {% else %}bg-gray-600{% endif %}" 
+                        style="width: {% if event.severity == 'CRITICAL' %}100%{% elif event.severity == 'HIGH' %}75%{% elif event.severity == 'MEDIUM' %}50%{% else %}25%{% endif %}">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <div class="text-gray-400 mb-4">No security events found</div>
+            <div class="text-sm text-primary">System is secure - no incidents to report</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Event Type Distribution -->
+    {% if event_distribution %}
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">EVENT TYPE DISTRIBUTION</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {% for item in event_distribution %}
+            <div class="bg-gray-900 p-3 rounded border border-gray-700 text-center">
+                <div class="text-primary text-lg font-bold">{{ item.count }}</div>
+                <div class="text-gray-300 text-xs">{{ item.event_type|title|replace:"_"," " }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Create Security Event Modal -->
+<div id="createEventModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">LOG SECURITY INCIDENT</h3>
+            <button onclick="closeCreateEventModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_security_event">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Event Type</label>
+                    <select name="event_type" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for event_code, event_display in event_types %}
+                        <option value="{{ event_code }}">{{ event_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Severity Level</label>
+                    <select name="severity" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for severity_code, severity_display in severity_levels %}
+                        <option value="{{ severity_code }}">{{ severity_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Description</label>
+                <textarea name="description" rows="4" required placeholder="Detailed description of the security incident..." class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">IP Address (Optional)</label>
+                    <input type="text" name="ip_address" placeholder="e.g., 192.168.1.100" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Module Accessed</label>
+                    <input type="text" name="module_accessed" placeholder="e.g., Personnel Management" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeCreateEventModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold">LOG INCIDENT</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resolve Event Modal -->
+<div id="resolveEventModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">RESOLVE SECURITY EVENT</h3>
+            <button onclick="closeResolveEventModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="resolve_event">
+            <input type="hidden" name="event_id" id="resolveEventId">
+            
+            <div class="mb-4">
+                <p class="text-gray-300">Are you sure you want to mark this security event as resolved?</p>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeResolveEventModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold">RESOLVE</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_scripts %}
+<script>
+function openCreateEventModal() {
+    document.getElementById('createEventModal').classList.remove('hidden');
+}
+
+function closeCreateEventModal() {
+    document.getElementById('createEventModal').classList.add('hidden');
+}
+
+function openResolveEventModal() {
+    document.getElementById('resolveEventModal').classList.remove('hidden');
+}
+
+function closeResolveEventModal() {
+    document.getElementById('resolveEventModal').classList.add('hidden');
+}
+
+function resolveEvent(eventId) {
+    document.getElementById('resolveEventId').value = eventId;
+    openResolveEventModal();
+}
+
+function viewEventDetails(eventId) {
+    alert('Event details functionality - Event ID: ' + eventId);
+    // TODO: Implement event details modal
+}
+
+function applyFilters() {
+    const severity = document.getElementById('severityFilter').value;
+    const resolved = document.getElementById('resolvedFilter').value;
+    
+    let url = window.location.pathname + '?';
+    if (severity) url += 'severity=' + severity + '&';
+    if (resolved) url += 'resolved=' + resolved + '&';
+    
+    window.location.href = url;
+}
+
+function refreshSecurityData() {
+    window.location.reload();
+}
+
+// Close modals when clicking outside
+document.getElementById('createEventModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateEventModal();
+    }
+});
+
+document.getElementById('resolveEventModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeResolveEventModal();
+    }
+});
+
+// Auto-refresh every 30 seconds
+setInterval(function() {
+    // Add subtle visual indication of refresh
+    const refreshButton = document.querySelector('button[onclick="refreshSecurityData()"]');
+    if (refreshButton) {
+        refreshButton.style.opacity = '0.5';
+        setTimeout(() => {
+            refreshButton.style.opacity = '1';
+        }, 200);
+    }
+}, 30000);
+</script>
+{% endblock %}

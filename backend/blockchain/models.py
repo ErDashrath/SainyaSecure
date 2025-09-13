@@ -13,8 +13,7 @@ from django.utils import timezone
 from users.models import MilitaryUser, Device
 from messaging.models import Message
 import uuid
-import hashlib
-import json
+from utils.military_crypto import military_crypto, military_blockchain
 
 
 class LocalLedgerBlock(models.Model):
@@ -85,7 +84,7 @@ class LocalLedgerBlock(models.Model):
         return f"Block #{self.block_number} - {self.sync_status}"
     
     def calculate_block_hash(self):
-        """Calculate the hash of this block"""
+        """Calculate the hash of this block using military crypto utilities"""
         block_data = {
             'block_number': self.block_number,
             'previous_block_hash': self.previous_block_hash,
@@ -93,19 +92,21 @@ class LocalLedgerBlock(models.Model):
             'timestamp': self.offline_timestamp.isoformat(),
             'nonce': self.nonce,
         }
-        block_string = json.dumps(block_data, sort_keys=True)
-        return hashlib.sha256(block_string.encode()).hexdigest()
+        return military_blockchain.calculate_block_hash(block_data)
     
     def is_hash_valid(self):
         """Verify the block hash is correct"""
         return self.block_hash == self.calculate_block_hash()
     
     def mine_block(self):
-        """Simple proof of work mining"""
-        target = "0" * self.difficulty
-        while not self.block_hash.startswith(target):
-            self.nonce += 1
-            self.block_hash = self.calculate_block_hash()
+        """Military-grade proof of work mining using crypto utilities"""
+        block_data = {
+            'block_number': self.block_number,
+            'previous_block_hash': self.previous_block_hash,
+            'merkle_root': self.merkle_root,
+            'timestamp': self.offline_timestamp.isoformat(),
+        }
+        self.block_hash, self.nonce = military_blockchain.mine_block(block_data, self.difficulty)
         self.is_verified = True
 
 
@@ -178,7 +179,7 @@ class MessageTransaction(models.Model):
         return f"Transaction {self.transaction_id} - {self.transaction_type}"
     
     def calculate_transaction_hash(self):
-        """Calculate hash of transaction data"""
+        """Calculate hash of transaction data using military crypto utilities"""
         tx_data = {
             'transaction_id': str(self.transaction_id),
             'message_id': str(self.message.message_id),
@@ -186,8 +187,7 @@ class MessageTransaction(models.Model):
             'transaction_type': self.transaction_type,
             'timestamp': self.message_timestamp.isoformat(),
         }
-        tx_string = json.dumps(tx_data, sort_keys=True)
-        return hashlib.sha256(tx_string.encode()).hexdigest()
+        return military_blockchain.calculate_block_hash(tx_data)
 
 
 class BlockchainTransaction(models.Model):
@@ -349,7 +349,7 @@ class AuditLog(models.Model):
         return f"Audit: {self.log_type} - {self.timestamp}"
     
     def calculate_log_hash(self):
-        """Calculate hash of this log entry"""
+        """Calculate hash of this log entry using military crypto utilities"""
         log_data = {
             'log_id': str(self.log_id),
             'log_type': self.log_type,
@@ -357,8 +357,7 @@ class AuditLog(models.Model):
             'timestamp': self.timestamp.isoformat(),
             'previous_log_hash': self.previous_log_hash,
         }
-        log_string = json.dumps(log_data, sort_keys=True)
-        return hashlib.sha256(log_string.encode()).hexdigest()
+        return military_blockchain.calculate_block_hash(log_data)
     
     def verify_integrity(self):
         """Verify log entry integrity"""

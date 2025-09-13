@@ -1,0 +1,215 @@
+{% extends 'modules/base_module.html' %}
+{% load static %}
+
+{% block title %}Personnel Management - {{ module_name }}{% endblock %}
+
+{% block module_header %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-primary">{{ module_name }}</h1>
+    <button onclick="openAddPersonnelModal()" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+        ADD PERSONNEL
+    </button>
+</div>
+{% endblock %}
+
+{% block module_content %}
+<div class="grid grid-cols-1 gap-6">
+    <!-- Personnel Statistics -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">PERSONNEL STATISTICS</h3>
+        <div class="grid grid-cols-4 gap-4 text-center">
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-primary text-xl font-bold">{{ personnel_list|length }}</div>
+                <div class="text-gray-300 text-sm">TOTAL</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-green-400 text-xl font-bold">{{ personnel_list|length }}</div>
+                <div class="text-gray-300 text-sm">ACTIVE</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-yellow-400 text-xl font-bold">0</div>
+                <div class="text-gray-300 text-sm">DEPLOYED</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-red-400 text-xl font-bold">0</div>
+                <div class="text-gray-300 text-sm">ON LEAVE</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personnel List -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">PERSONNEL ROSTER</h3>
+        
+        {% if personnel_list %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-green-800">
+                        <th class="text-left py-2 text-primary">SERVICE #</th>
+                        <th class="text-left py-2 text-primary">NAME</th>
+                        <th class="text-left py-2 text-primary">RANK</th>
+                        <th class="text-left py-2 text-primary">ASSIGNMENT</th>
+                        <th class="text-left py-2 text-primary">LOCATION</th>
+                        <th class="text-left py-2 text-primary">STATUS</th>
+                        <th class="text-left py-2 text-primary">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for personnel in personnel_list %}
+                    <tr class="border-b border-gray-800 hover:bg-gray-900">
+                        <td class="py-2 text-gray-300">{{ personnel.service_number }}</td>
+                        <td class="py-2 text-gray-300">{{ personnel.first_name }} {{ personnel.last_name }}</td>
+                        <td class="py-2 text-gray-300">{{ personnel.military_user.rank }}</td>
+                        <td class="py-2 text-gray-300">{{ personnel.current_assignment }}</td>
+                        <td class="py-2 text-gray-300">{{ personnel.location }}</td>
+                        <td class="py-2">
+                            <span class="px-2 py-1 rounded text-xs {% if personnel.status == 'ACTIVE' %}bg-green-900 text-green-400{% elif personnel.status == 'DEPLOYED' %}bg-yellow-900 text-yellow-400{% elif personnel.status == 'MEDICAL' %}bg-red-900 text-red-400{% else %}bg-gray-900 text-gray-400{% endif %}">
+                                {{ personnel.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-2">
+                            <button onclick="editPersonnel('{{ personnel.personnel_id }}')" class="text-primary hover:text-green-400 mr-2">EDIT</button>
+                            <button onclick="viewPersonnel('{{ personnel.personnel_id }}')" class="text-primary hover:text-green-400">VIEW</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <div class="text-gray-400">No personnel records found</div>
+            <button onclick="openAddPersonnelModal()" class="mt-4 bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+                ADD FIRST PERSONNEL
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Personnel Modal -->
+<div id="addPersonnelModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">ADD PERSONNEL</h3>
+            <button onclick="closeAddPersonnelModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_personnel">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">First Name</label>
+                    <input type="text" name="first_name" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Last Name</label>
+                    <input type="text" name="last_name" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Service Number</label>
+                    <input type="text" name="service_number" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Rank</label>
+                    <select name="rank" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        <option value="COMMAND">COMMAND</option>
+                        <option value="OPERATIONS">OPERATIONS</option>
+                        <option value="INTELLIGENCE">INTELLIGENCE</option>
+                        <option value="COMMUNICATIONS">COMMUNICATIONS</option>
+                        <option value="FIELD">FIELD</option>
+                        <option value="EMERGENCY">EMERGENCY</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Date of Birth</label>
+                    <input type="date" name="date_of_birth" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Enlistment Date</label>
+                    <input type="date" name="enlistment_date" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Current Assignment</label>
+                    <input type="text" name="current_assignment" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Location</label>
+                    <input type="text" name="location" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Status</label>
+                <select name="status" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                    {% for status_code, status_display in status_choices %}
+                    <option value="{{ status_code }}">{{ status_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Emergency Contact Name</label>
+                    <input type="text" name="emergency_contact_name" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Emergency Contact Phone</label>
+                    <input type="tel" name="emergency_contact_phone" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Medical Notes</label>
+                <textarea name="medical_notes" rows="3" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeAddPersonnelModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">ADD PERSONNEL</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_scripts %}
+<script>
+function openAddPersonnelModal() {
+    document.getElementById('addPersonnelModal').classList.remove('hidden');
+}
+
+function closeAddPersonnelModal() {
+    document.getElementById('addPersonnelModal').classList.add('hidden');
+}
+
+function editPersonnel(personnelId) {
+    alert('Edit functionality - Personnel ID: ' + personnelId);
+    // TODO: Implement edit modal
+}
+
+function viewPersonnel(personnelId) {
+    alert('View functionality - Personnel ID: ' + personnelId);
+    // TODO: Implement view modal
+}
+
+// Close modal when clicking outside
+document.getElementById('addPersonnelModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddPersonnelModal();
+    }
+});
+</script>
+{% endblock %}

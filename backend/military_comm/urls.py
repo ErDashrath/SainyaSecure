@@ -22,7 +22,6 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from . import views
 
 
 @api_view(['GET'])
@@ -43,6 +42,7 @@ def api_root(request):
         'version': '1.0.0',
         'status': 'active',
         'modules': {
+            'command_center': request.build_absolute_uri('/command/api/'),
             'users': request.build_absolute_uri('/users/api/'),
             'messaging': request.build_absolute_uri('/messaging/api/'),
             'blockchain': request.build_absolute_uri('/blockchain/api/'),
@@ -56,11 +56,11 @@ def api_root(request):
 
 
 urlpatterns = [
-    # Frontend URLs
-    path('', views.index, name='index'),
-    path('login/', views.login_view, name='login'), 
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('join/<str:join_token>/', views.device_join, name='device_join'),
+    # Frontend URLs - using army1 app for soldier/peer UI
+    path('', include('army1.urls')),
+    
+    # Command Center - Master Authority Dashboard
+    path('command/', include('command_center.urls')),
     
     # Main API root endpoint
     path('api/', api_root, name='api-root'),

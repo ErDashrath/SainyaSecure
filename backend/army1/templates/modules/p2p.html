@@ -1,0 +1,1093 @@
+{% extends 'modules/base_module.html' %}
+
+{% block module_icon %}network-wired{% endblock %}
+{% block module_icon_large %}project-diagram{% endblock %}
+{% block module_status %}CONNECTING{% endblock %}
+
+{% extends 'modules/base_module.html' %}
+
+{% block module_icon %}satellite-dish{% endblock %}
+{% block module_icon_large %}project-diagram{% endblock %}
+{% block module_status %}🌐 P2P NETWORK ACTIVE{% endblock %}
+{% block status_color %}success{% endblock %}
+
+{% block module_content %}
+<!-- P2P Network Command Center -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+    
+    <!-- Network Topology Visualization -->
+    <div class="xl:col-span-2">
+        <div class="battlefield-container p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-3">
+                    <i class="fas fa-project-diagram"></i>
+                    P2P NETWORK TOPOLOGY
+                </h3>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-success bg-opacity-20 text-success px-2 py-1 rounded">MESH ACTIVE</span>
+                    <button class="control-button secondary px-3 py-2 text-sm" onclick="refreshTopology()">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Interactive Network Map -->
+            <div class="network-topology-map">
+                <div class="map-grid"></div>
+                
+                <!-- Central Command Node -->
+                <div class="p2p-node central" style="left: 50%; top: 50%; transform: translate(-50%, -50%);" 
+                     data-node="central" title="Central Command Hub">
+                    <i class="fas fa-crown"></i>
+                    <span class="node-label">CMD</span>
+                </div>
+                
+                <!-- Field Nodes -->
+                <div class="p2p-node online" style="left: 20%; top: 30%;" data-node="alpha" title="Alpha Team - Strong Signal">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="node-label">A1</span>
+                </div>
+                
+                <div class="p2p-node online" style="left: 80%; top: 25%;" data-node="bravo" title="Bravo Team - Optimal">
+                    <i class="fas fa-binoculars"></i>
+                    <span class="node-label">B1</span>
+                </div>
+                
+                <div class="p2p-node warning" style="left: 25%; top: 75%;" data-node="charlie" title="Charlie Team - Weak Signal">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="node-label">C1</span>
+                </div>
+                
+                <div class="p2p-node online" style="left: 75%; top: 70%;" data-node="delta" title="Delta Team - Strong">
+                    <i class="fas fa-satellite"></i>
+                    <span class="node-label">D1</span>
+                </div>
+                
+                <div class="p2p-node offline" style="left: 90%; top: 50%;" data-node="echo" title="Echo Team - Connection Lost">
+                    <i class="fas fa-times-circle"></i>
+                    <span class="node-label">E1</span>
+                </div>
+                
+                <!-- Network Connections -->
+                <div class="network-connection active" data-from="central" data-to="alpha"></div>
+                <div class="network-connection active" data-from="central" data-to="bravo"></div>
+                <div class="network-connection weak" data-from="central" data-to="charlie"></div>
+                <div class="network-connection active" data-from="central" data-to="delta"></div>
+                <div class="network-connection broken" data-from="central" data-to="echo"></div>
+                <div class="network-connection mesh" data-from="alpha" data-to="bravo"></div>
+                <div class="network-connection mesh" data-from="bravo" data-to="delta"></div>
+            </div>
+            
+            <!-- Network Controls -->
+            <div class="military-controls">
+                <button class="control-button" onclick="addNewNode()">
+                    <i class="fas fa-plus"></i>
+                    Add Node
+                </button>
+                <button class="control-button warning" onclick="optimizeNetwork()">
+                    <i class="fas fa-magic"></i>
+                    Auto-Optimize
+                </button>
+                <button class="control-button danger" onclick="emergencyFailover()">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Emergency Failover
+                </button>
+                <button class="control-button info" onclick="networkDiagnostics()">
+                    <i class="fas fa-stethoscope"></i>
+                    Diagnostics
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network Statistics Panel -->
+    <div class="xl:col-span-1 space-y-6">
+        
+        <!-- Real-time Metrics -->
+        <div class="battlefield-container p-6">
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-tachometer-alt"></i>
+                NETWORK PERFORMANCE
+            </h4>
+            
+            <div class="space-y-4">
+                <div class="metric-display">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-300">Connected Nodes</span>
+                        <span class="text-lg font-bold text-success">4/5</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill bg-success" style="width: 80%;"></div>
+                    </div>
+                </div>
+                
+                <div class="metric-display">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-300">Network Throughput</span>
+                        <span class="text-lg font-bold text-primary">847 MB/s</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill bg-primary" style="width: 65%;"></div>
+                    </div>
+                </div>
+                
+                <div class="metric-display">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-300">Average Latency</span>
+                        <span class="text-lg font-bold text-warning">12ms</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill bg-warning" style="width: 25%;"></div>
+                    </div>
+                </div>
+                
+                <div class="metric-display">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-300">Network Uptime</span>
+                        <span class="text-lg font-bold text-info">99.8%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill bg-info" style="width: 99.8%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Node Status List -->
+        <div class="battlefield-container p-6">
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-list"></i>
+                NODE STATUS
+            </h4>
+            
+            <div class="space-y-3">
+                <div class="node-status-item">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white">Alpha Team (A1)</div>
+                            <div class="text-xs text-gray-400">Signal: Strong • 156 MB/s</div>
+                        </div>
+                        <div class="text-xs text-success">ONLINE</div>
+                    </div>
+                </div>
+                
+                <div class="node-status-item">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white">Bravo Team (B1)</div>
+                            <div class="text-xs text-gray-400">Signal: Optimal • 203 MB/s</div>
+                        </div>
+                        <div class="text-xs text-success">ONLINE</div>
+                    </div>
+                </div>
+                
+                <div class="node-status-item">
+                    <div class="flex items-center gap-3">
+                        <div class="status-warning"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white">Charlie Team (C1)</div>
+                            <div class="text-xs text-gray-400">Signal: Weak • 23 MB/s</div>
+                        </div>
+                        <div class="text-xs text-warning">UNSTABLE</div>
+                    </div>
+                </div>
+                
+                <div class="node-status-item">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-white">Delta Team (D1)</div>
+                            <div class="text-xs text-gray-400">Signal: Strong • 189 MB/s</div>
+                        </div>
+                        <div class="text-xs text-success">ONLINE</div>
+                    </div>
+                </div>
+                
+                <div class="node-status-item">
+                    <div class="flex items-center gap-3">
+                        <div class="status-offline"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-gray-400">Echo Team (E1)</div>
+                            <div class="text-xs text-gray-500">Connection lost • 0 MB/s</div>
+                        </div>
+                        <div class="text-xs text-danger">OFFLINE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Status -->
+        <div class="battlefield-container p-6">
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-shield-alt"></i>
+                SECURITY STATUS
+            </h4>
+            
+            <div class="space-y-3">
+                <div class="security-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">Encryption Level</span>
+                        <span class="text-sm font-bold text-success">AES-256</span>
+                    </div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">Authentication</span>
+                        <span class="text-sm font-bold text-success">Active</span>
+                    </div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">Intrusion Detection</span>
+                        <span class="text-sm font-bold text-success">Enabled</span>
+                    </div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-300">Security Threats</span>
+                        <span class="text-sm font-bold text-success">None Detected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Active Connections Table -->
+<div class="battlefield-container p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-primary flex items-center gap-3">
+            <i class="fas fa-network-wired"></i>
+            ACTIVE P2P CONNECTIONS
+        </h3>
+        <div class="flex items-center gap-3">
+            <span class="text-xs bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-full">
+                <i class="fas fa-link mr-1"></i>15 ACTIVE LINKS
+            </span>
+            <button class="control-button secondary px-4 py-2 text-sm" onclick="refreshConnections()">
+                <i class="fas fa-refresh mr-2"></i>
+                REFRESH
+            </button>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full military-table">
+            <thead>
+                <tr>
+                    <th class="table-header">NODE ID</th>
+                    <th class="table-header">LOCATION</th>
+                    <th class="table-header">STATUS</th>
+                    <th class="table-header">BANDWIDTH</th>
+                    <th class="table-header">LATENCY</th>
+                    <th class="table-header">ENCRYPTION</th>
+                    <th class="table-header">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-row">
+                    <td class="table-cell font-mono text-primary">NODE-A1</td>
+                    <td class="table-cell">Alpha Command Post</td>
+                    <td class="table-cell">
+                        <span class="status-badge success">
+                            <i class="fas fa-circle mr-1"></i>ONLINE
+                        </span>
+                    </td>
+                    <td class="table-cell">156 MB/s</td>
+                    <td class="table-cell text-success">8ms</td>
+                    <td class="table-cell">
+                        <i class="fas fa-lock text-success mr-1"></i>AES-256
+                    </td>
+                    <td class="table-cell">
+                        <div class="flex gap-2">
+                            <button class="action-btn primary" onclick="monitorNode('A1')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn danger" onclick="disconnectNode('A1')">
+                                <i class="fas fa-unlink"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="table-row">
+                    <td class="table-cell font-mono text-primary">NODE-B1</td>
+                    <td class="table-cell">Bravo Reconnaissance</td>
+                    <td class="table-cell">
+                        <span class="status-badge success">
+                            <i class="fas fa-circle mr-1"></i>ONLINE
+                        </span>
+                    </td>
+                    <td class="table-cell">203 MB/s</td>
+                    <td class="table-cell text-success">5ms</td>
+                    <td class="table-cell">
+                        <i class="fas fa-lock text-success mr-1"></i>AES-256
+                    </td>
+                    <td class="table-cell">
+                        <div class="flex gap-2">
+                            <button class="action-btn primary" onclick="monitorNode('B1')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn danger" onclick="disconnectNode('B1')">
+                                <i class="fas fa-unlink"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="table-row">
+                    <td class="table-cell font-mono text-primary">NODE-C1</td>
+                    <td class="table-cell">Charlie Support Unit</td>
+                    <td class="table-cell">
+                        <span class="status-badge warning">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>UNSTABLE
+                        </span>
+                    </td>
+                    <td class="table-cell">23 MB/s</td>
+                    <td class="table-cell text-warning">45ms</td>
+                    <td class="table-cell">
+                        <i class="fas fa-lock text-warning mr-1"></i>AES-128
+                    </td>
+                    <td class="table-cell">
+                        <div class="flex gap-2">
+                            <button class="action-btn primary" onclick="monitorNode('C1')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn warning" onclick="stabilizeNode('C1')">
+                                <i class="fas fa-wrench"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="table-row">
+                    <td class="table-cell font-mono text-primary">NODE-D1</td>
+                    <td class="table-cell">Delta Communications</td>
+                    <td class="table-cell">
+                        <span class="status-badge success">
+                            <i class="fas fa-circle mr-1"></i>ONLINE
+                        </span>
+                    </td>
+                    <td class="table-cell">189 MB/s</td>
+                    <td class="table-cell text-success">7ms</td>
+                    <td class="table-cell">
+                        <i class="fas fa-lock text-success mr-1"></i>AES-256
+                    </td>
+                    <td class="table-cell">
+                        <div class="flex gap-2">
+                            <button class="action-btn primary" onclick="monitorNode('D1')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn danger" onclick="disconnectNode('D1')">
+                                <i class="fas fa-unlink"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                
+                <tr class="table-row opacity-50">
+                    <td class="table-cell font-mono text-gray-500">NODE-E1</td>
+                    <td class="table-cell text-gray-500">Echo Medical Team</td>
+                    <td class="table-cell">
+                        <span class="status-badge danger">
+                            <i class="fas fa-times-circle mr-1"></i>OFFLINE
+                        </span>
+                    </td>
+                    <td class="table-cell text-gray-500">0 MB/s</td>
+                    <td class="table-cell text-danger">N/A</td>
+                    <td class="table-cell text-gray-500">
+                        <i class="fas fa-unlock text-danger mr-1"></i>NONE
+                    </td>
+                    <td class="table-cell">
+                        <div class="flex gap-2">
+                            <button class="action-btn secondary" onclick="reconnectNode('E1')">
+                                <i class="fas fa-link"></i>
+                            </button>
+                            <button class="action-btn info" onclick="pingNode('E1')">
+                                <i class="fas fa-broadcast-tower"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_actions %}
+<!-- P2P Network Operations -->
+<div class="space-y-6">
+    
+    <!-- Node Management -->
+    <div class="battlefield-container p-6 text-center border-2 border-success">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-plus text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">ADD NETWORK NODE</h4>
+        <p class="text-sm text-gray-400 mb-4">Connect new P2P nodes to expand battlefield network coverage</p>
+        <div class="space-y-2">
+            <button class="control-button w-full" onclick="addNetworkNode()">
+                <i class="fas fa-plus mr-2"></i>
+                DEPLOY NODE
+            </button>
+            <div class="text-xs text-success">
+                <i class="fas fa-network-wired mr-1"></i>
+                Auto-discovery enabled
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Operations -->
+    <div class="battlefield-container p-6 text-center border-2 border-warning">
+        <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-shield-alt text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">SECURITY SCAN</h4>
+        <p class="text-sm text-gray-400 mb-4">Comprehensive network security analysis and threat detection</p>
+        <div class="space-y-2">
+            <button class="control-button warning w-full" onclick="runSecurityScan()">
+                <i class="fas fa-search mr-2"></i>
+                SCAN NETWORK
+            </button>
+            <div class="text-xs text-warning">
+                <i class="fas fa-lock mr-1"></i>
+                Last scan: 2 hours ago
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-Configuration -->
+    <div class="battlefield-container p-6 text-center border-2 border-info">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-magic text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">AUTO-OPTIMIZE</h4>
+        <p class="text-sm text-gray-400 mb-4">Automatic network configuration and performance optimization</p>
+        <div class="space-y-2">
+            <button class="control-button info w-full" onclick="optimizeP2PNetwork()">
+                <i class="fas fa-cogs mr-2"></i>
+                OPTIMIZE NOW
+            </button>
+            <div class="text-xs text-info">
+                <i class="fas fa-tachometer-alt mr-1"></i>
+                Performance boost: +23%
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Protocols -->
+    <div class="battlefield-container p-6 text-center border-2 border-danger">
+        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">EMERGENCY FAILOVER</h4>
+        <p class="text-sm text-gray-400 mb-4">Activate emergency protocols and backup communication routes</p>
+        <div class="space-y-2">
+            <button class="control-button danger w-full" onclick="activateFailover()">
+                <i class="fas fa-shield-virus mr-2"></i>
+                EMERGENCY MODE
+            </button>
+            <div class="text-xs text-danger">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                Use only in critical situations
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Analytics -->
+    <div class="battlefield-container p-6 text-center border-2 border-primary">
+        <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chart-line text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">NETWORK ANALYTICS</h4>
+        <p class="text-sm text-gray-400 mb-4">Detailed performance reports and network topology analysis</p>
+        <div class="space-y-2">
+            <button class="control-button w-full" onclick="viewNetworkAnalytics()">
+                <i class="fas fa-chart-bar mr-2"></i>
+                VIEW REPORTS
+            </button>
+            <div class="text-xs text-primary">
+                <i class="fas fa-database mr-1"></i>
+                Real-time metrics available
+            </div>
+        </div>
+    </div>
+
+    <!-- Mesh Network Tools -->
+    <div class="battlefield-container p-6 text-center border-2 border-secondary">
+        <div class="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-project-diagram text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">MESH CONFIGURATION</h4>
+        <p class="text-sm text-gray-400 mb-4">Advanced mesh network setup and routing optimization</p>
+        <div class="space-y-2">
+            <button class="control-button secondary w-full" onclick="configureMesh()">
+                <i class="fas fa-sitemap mr-2"></i>
+                MESH SETUP
+            </button>
+            <div class="text-xs text-gray-400">
+                <i class="fas fa-route mr-1"></i>
+                15 active mesh routes
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block module_js %}
+// Enhanced P2P Network JavaScript
+let networkUpdateInterval;
+let topologyRenderer;
+
+// Initialize P2P network visualization
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNetworkTopology();
+    startNetworkMonitoring();
+    setupNodeInteractions();
+});
+
+function initializeNetworkTopology() {
+    const nodes = document.querySelectorAll('.p2p-node');
+    const connections = document.querySelectorAll('.network-connection');
+    
+    // Animate node appearance
+    nodes.forEach((node, index) => {
+        setTimeout(() => {
+            node.style.opacity = '1';
+            node.style.transform += ' scale(1)';
+        }, index * 200);
+    });
+    
+    // Animate connections
+    connections.forEach((connection, index) => {
+        setTimeout(() => {
+            connection.style.opacity = '1';
+        }, 1000 + (index * 300));
+    });
+}
+
+function startNetworkMonitoring() {
+    // Real-time network updates
+    networkUpdateInterval = setInterval(() => {
+        updateNetworkMetrics();
+        updateNodeStatus();
+        updateConnections();
+    }, 3000);
+}
+
+function setupNodeInteractions() {
+    const nodes = document.querySelectorAll('.p2p-node');
+    
+    nodes.forEach(node => {
+        node.addEventListener('mouseenter', function() {
+            showNodeDetails(this.getAttribute('data-node'));
+            this.style.transform += ' scale(1.1)';
+        });
+        
+        node.addEventListener('mouseleave', function() {
+            hideNodeDetails();
+            this.style.transform = this.style.transform.replace(' scale(1.1)', '');
+        });
+        
+        node.addEventListener('click', function() {
+            selectNode(this.getAttribute('data-node'));
+        });
+    });
+}
+
+function updateNetworkMetrics() {
+    // Simulate real-time metrics updates
+    const metrics = [
+        { element: '.metric-display:nth-child(1) .progress-fill', width: 75 + Math.random() * 20 },
+        { element: '.metric-display:nth-child(2) .progress-fill', width: 60 + Math.random() * 25 },
+        { element: '.metric-display:nth-child(3) .progress-fill', width: 20 + Math.random() * 15 },
+        { element: '.metric-display:nth-child(4) .progress-fill', width: 95 + Math.random() * 5 }
+    ];
+    
+    metrics.forEach(metric => {
+        const element = document.querySelector(metric.element);
+        if (element) {
+            element.style.width = `${Math.min(100, metric.width)}%`;
+        }
+    });
+}
+
+function updateNodeStatus() {
+    const nodes = document.querySelectorAll('.p2p-node');
+    
+    nodes.forEach(node => {
+        if (Math.random() > 0.95) {
+            // Simulate occasional status blinks
+            const originalClass = node.className;
+            node.classList.add('pulsing');
+            
+            setTimeout(() => {
+                node.className = originalClass;
+            }, 1000);
+        }
+    });
+}
+
+function updateConnections() {
+    const connections = document.querySelectorAll('.network-connection');
+    
+    connections.forEach(connection => {
+        if (Math.random() > 0.9) {
+            // Simulate data transfer animation
+            connection.style.animation = 'data-flow 1s ease-in-out';
+            setTimeout(() => {
+                connection.style.animation = '';
+            }, 1000);
+        }
+    });
+}
+
+// Network Control Functions
+function refreshTopology() {
+    console.log('Refreshing network topology...');
+    // Animate refresh
+    const map = document.querySelector('.network-topology-map');
+    if (map) {
+        map.style.opacity = '0.5';
+        setTimeout(() => {
+            map.style.opacity = '1';
+        }, 500);
+    }
+}
+
+function addNewNode() {
+    console.log('Adding new network node...');
+    // Would implement node addition logic
+    showNetworkAction('NEW NODE DEPLOYMENT INITIATED', 'success');
+}
+
+function optimizeNetwork() {
+    console.log('Optimizing network performance...');
+    showNetworkAction('NETWORK OPTIMIZATION IN PROGRESS', 'warning');
+    
+    // Simulate optimization animation
+    const nodes = document.querySelectorAll('.p2p-node');
+    nodes.forEach((node, index) => {
+        setTimeout(() => {
+            node.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.8)';
+            setTimeout(() => {
+                node.style.boxShadow = '';
+            }, 1000);
+        }, index * 200);
+    });
+}
+
+function emergencyFailover() {
+    console.log('Activating emergency failover protocols...');
+    showNetworkAction('🚨 EMERGENCY FAILOVER ACTIVATED', 'danger');
+    
+    // Emergency animation
+    document.body.style.animation = 'emergency-flash 3s ease-in-out';
+    setTimeout(() => {
+        document.body.style.animation = '';
+    }, 3000);
+}
+
+function networkDiagnostics() {
+    console.log('Running network diagnostics...');
+    showNetworkAction('NETWORK DIAGNOSTICS RUNNING', 'info');
+}
+
+// Table Action Functions
+function monitorNode(nodeId) {
+    console.log(`Monitoring node: ${nodeId}`);
+    showNetworkAction(`MONITORING NODE ${nodeId}`, 'primary');
+}
+
+function disconnectNode(nodeId) {
+    console.log(`Disconnecting node: ${nodeId}`);
+    showNetworkAction(`DISCONNECTING NODE ${nodeId}`, 'warning');
+}
+
+function stabilizeNode(nodeId) {
+    console.log(`Stabilizing node: ${nodeId}`);
+    showNetworkAction(`STABILIZING NODE ${nodeId}`, 'warning');
+}
+
+function reconnectNode(nodeId) {
+    console.log(`Reconnecting node: ${nodeId}`);
+    showNetworkAction(`RECONNECTING NODE ${nodeId}`, 'info');
+}
+
+function pingNode(nodeId) {
+    console.log(`Pinging node: ${nodeId}`);
+    showNetworkAction(`PINGING NODE ${nodeId}`, 'secondary');
+}
+
+// Module Action Functions
+function addNetworkNode() {
+    addNewNode();
+}
+
+function runSecurityScan() {
+    console.log('Running comprehensive security scan...');
+    showNetworkAction('SECURITY SCAN IN PROGRESS', 'warning');
+}
+
+function optimizeP2PNetwork() {
+    optimizeNetwork();
+}
+
+function activateFailover() {
+    emergencyFailover();
+}
+
+function viewNetworkAnalytics() {
+    console.log('Opening network analytics...');
+    showNetworkAction('LOADING ANALYTICS DASHBOARD', 'primary');
+}
+
+function configureMesh() {
+    console.log('Configuring mesh network...');
+    showNetworkAction('MESH CONFIGURATION STARTED', 'secondary');
+}
+
+function refreshConnections() {
+    refreshTopology();
+}
+
+// Utility Functions
+function showNetworkAction(message, type = 'primary') {
+    const alert = document.createElement('div');
+    alert.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg border text-sm font-semibold
+                      bg-${type} bg-opacity-20 border-${type} text-${type}`;
+    alert.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas fa-info-circle"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => alert.remove(), 300);
+    }, 3000);
+}
+
+function showNodeDetails(nodeId) {
+    // Would show detailed node information
+    console.log(`Showing details for node: ${nodeId}`);
+}
+
+function hideNodeDetails() {
+    // Would hide node details
+}
+
+function selectNode(nodeId) {
+    console.log(`Selected node: ${nodeId}`);
+    // Highlight selected node
+    document.querySelectorAll('.p2p-node').forEach(node => {
+        node.classList.remove('selected');
+    });
+    
+    const selectedNode = document.querySelector(`[data-node="${nodeId}"]`);
+    if (selectedNode) {
+        selectedNode.classList.add('selected');
+    }
+}
+
+// Network Animation Styles
+const networkStyles = document.createElement('style');
+networkStyles.textContent = `
+    .network-topology-map {
+        position: relative;
+        height: 400px;
+        background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(0, 40, 20, 0.4));
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .p2p-node {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.8), rgba(0, 200, 255, 0.6));
+        border: 2px solid rgba(0, 255, 136, 0.6);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    
+    .p2p-node.central {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.6));
+        border-color: rgba(255, 215, 0, 0.8);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    }
+    
+    .p2p-node.online {
+        border-color: rgba(0, 255, 136, 0.8);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+    }
+    
+    .p2p-node.warning {
+        border-color: rgba(255, 193, 7, 0.8);
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.8), rgba(255, 152, 0, 0.6));
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+    }
+    
+    .p2p-node.offline {
+        border-color: rgba(220, 38, 127, 0.8);
+        background: linear-gradient(135deg, rgba(220, 38, 127, 0.6), rgba(153, 27, 27, 0.4));
+        box-shadow: 0 0 15px rgba(220, 38, 127, 0.3);
+        opacity: 0.6;
+    }
+    
+    .p2p-node.selected {
+        transform: scale(1.2);
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+        z-index: 10;
+    }
+    
+    .p2p-node.pulsing {
+        animation: node-pulse 1s ease-in-out infinite;
+    }
+    
+    .p2p-node:hover {
+        transform: scale(1.1);
+        z-index: 5;
+    }
+    
+    .node-label {
+        font-size: 0.75rem;
+        margin-top: 2px;
+    }
+    
+    .network-connection {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.6), transparent);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    
+    .network-connection.active {
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.8), transparent);
+        box-shadow: 0 0 4px rgba(0, 255, 136, 0.4);
+    }
+    
+    .network-connection.weak {
+        background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.6), transparent);
+    }
+    
+    .network-connection.broken {
+        background: linear-gradient(90deg, transparent, rgba(220, 38, 127, 0.6), transparent);
+        animation: connection-error 1s ease-in-out infinite;
+    }
+    
+    .network-connection.mesh {
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(75, 85, 99, 0.5);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        transition: width 0.5s ease;
+        border-radius: 3px;
+    }
+    
+    .metric-display {
+        padding: 12px;
+        background: rgba(17, 24, 39, 0.5);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 6px;
+    }
+    
+    .node-status-item {
+        padding: 12px;
+        background: rgba(17, 24, 39, 0.3);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+    
+    .node-status-item:hover {
+        border-color: rgba(0, 255, 136, 0.5);
+        background: rgba(17, 24, 39, 0.6);
+    }
+    
+    .security-item {
+        padding: 8px 12px;
+        background: rgba(17, 24, 39, 0.3);
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+    
+    .military-table {
+        background: rgba(17, 24, 39, 0.8);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table-header {
+        background: rgba(0, 255, 136, 0.1);
+        border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+        padding: 12px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(0, 255, 136, 1);
+        text-transform: uppercase;
+    }
+    
+    .table-row {
+        border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-row:hover {
+        background: rgba(0, 255, 136, 0.05);
+    }
+    
+    .table-cell {
+        padding: 12px;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .status-badge.success {
+        background: rgba(16, 185, 129, 0.2);
+        color: rgba(16, 185, 129, 1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .status-badge.warning {
+        background: rgba(245, 158, 11, 0.2);
+        color: rgba(245, 158, 11, 1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .status-badge.danger {
+        background: rgba(239, 68, 68, 0.2);
+        color: rgba(239, 68, 68, 1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+    
+    .action-btn.primary {
+        color: rgba(0, 255, 136, 1);
+        border-color: rgba(0, 255, 136, 0.3);
+    }
+    
+    .action-btn.primary:hover {
+        background: rgba(0, 255, 136, 0.1);
+    }
+    
+    .action-btn.danger {
+        color: rgba(239, 68, 68, 1);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .action-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .action-btn.warning {
+        color: rgba(245, 158, 11, 1);
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+    
+    .action-btn.warning:hover {
+        background: rgba(245, 158, 11, 0.1);
+    }
+    
+    .action-btn.info {
+        color: rgba(59, 130, 246, 1);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+    
+    .action-btn.info:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .action-btn.secondary {
+        color: rgba(156, 163, 175, 1);
+        border-color: rgba(156, 163, 175, 0.3);
+    }
+    
+    .action-btn.secondary:hover {
+        background: rgba(156, 163, 175, 0.1);
+    }
+    
+    @keyframes node-pulse {
+        0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+        50% { box-shadow: 0 0 25px rgba(0, 255, 136, 0.6); }
+    }
+    
+    @keyframes connection-error {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 0.2; }
+    }
+    
+    @keyframes data-flow {
+        0% { background-position: -100% 0; }
+        100% { background-position: 100% 0; }
+    }
+    
+    @keyframes emergency-flash {
+        0%, 100% { background-color: transparent; }
+        25%, 75% { background-color: rgba(239, 68, 68, 0.1); }
+        50% { background-color: rgba(239, 68, 68, 0.2); }
+    }
+`;
+document.head.appendChild(networkStyles);
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (networkUpdateInterval) {
+        clearInterval(networkUpdateInterval);
+    }
+});
+{% endblock %}

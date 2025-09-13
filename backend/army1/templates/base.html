@@ -1,26 +1,1304 @@
-{% load static tailwind_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <title>Django Tailwind</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {% tailwind_css %}
+    <title>{% block title %}SainyaSecure - Military Command Center{% endblock %}</title>
+    
+    <!-- Tailwind CSS + DaisyUI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Military Theme CSS -->
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            --primary: #00ff88;
+            --primary-dark: #00cc6a;
+            --secondary: #0066ff;
+            --danger: #ff3366;
+            --warning: #ffaa00;
+            --success: #00ff88;
+            --dark: #0a0e1a;
+            --darker: #070b14;
+            --light: #1a1f2e;
+            --lighter: #2a3441;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0a0e1a 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Military Command Interface Styling */
+        .command-interface {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 102, 255, 0.05) 100%);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .military-card {
+            background: rgba(26, 31, 46, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .military-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background: linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 100%);
+            border-right: 1px solid var(--border);
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 4px 16px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 102, 255, 0.1) 100%);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: rgba(26, 31, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            height: 70px;
+            position: fixed;
+            top: 0;
+            left: 280px;
+            right: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 280px;
+            margin-top: 70px;
+            padding: 30px;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Status Indicators */
+        .status-online {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-offline {
+            width: 8px;
+            height: 8px;
+            background: #64748b;
+            border-radius: 50%;
+        }
+
+        .status-warning {
+            width: 8px;
+            height: 8px;
+            background: var(--warning);
+            border-radius: 50%;
+            animation: pulse-yellow 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-yellow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Military Button Styles */
+        .btn-military {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--dark);
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+
+        .btn-military:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #0052cc 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #cc1a4d 100%);
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: rgba(26, 31, 46, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Activity Feed */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(26, 31, 46, 0.4);
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            border-color: var(--border);
+            background: rgba(26, 31, 46, 0.8);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .top-header {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Classification Banner */
+        .classification-banner {
+            background: linear-gradient(90deg, var(--danger) 0%, #ff6b35 100%);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+
+        .main-content.with-banner {
+            margin-top: 100px;
+        }
+
+        .top-header.with-banner {
+            top: 30px;
+        }
+
+        /* Terminal/Console Style */
+        .terminal {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 14px;
+            color: var(--success);
+        }
+
+        .terminal-prompt {
+            color: var(--primary);
+        }
+
+        .terminal-output {
+            color: var(--text);
+            margin: 4px 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--darker);
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border);
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .mobile-menu-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: none;
+            }
+            
+            .mobile-menu-overlay.active {
+                display: block;
+            }
+            
+            .header {
+                padding: 0.75rem 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .battlefield-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .military-controls {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .control-button {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .tactical-map {
+                height: 250px;
+            }
+            
+            .battlefield-node {
+                width: 40px;
+                height: 40px;
+                font-size: 0.75rem;
+            }
+            
+            .message-terminal {
+                height: 200px;
+            }
+            
+            .military-chat {
+                height: 300px;
+            }
+            
+            .network-topology-map {
+                height: 280px;
+            }
+            
+            .p2p-node {
+                width: 45px;
+                height: 45px;
+                font-size: 0.75rem;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .military-table {
+                min-width: 600px;
+            }
+            
+            .channel-item {
+                padding: 0.75rem;
+            }
+            
+            .message-input-container input {
+                padding: 0.75rem;
+            }
+            
+            .classification-banner {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .status-indicators {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            /* Touch-optimized controls */
+            .control-button, .action-btn, .btn {
+                min-height: 44px;
+                min-width: 44px;
+                touch-action: manipulation;
+            }
+            
+            /* Mobile navigation */
+            .mobile-nav-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 1001;
+                background: var(--primary-color);
+                border: 2px solid rgba(0, 255, 136, 0.5);
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                color: white;
+                font-size: 1.25rem;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            
+            .mobile-nav-toggle:hover {
+                background: rgba(0, 255, 136, 0.9);
+                box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-nav-toggle {
+                display: none;
+            }
+        }
+        
+        /* Tablet optimizations */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+                padding: 1.5rem;
+            }
+            
+            .battlefield-container {
+                padding: 1.25rem;
+            }
+            
+            .grid {
+                gap: 1.25rem;
+            }
+            
+            .tactical-map {
+                height: 350px;
+            }
+            
+            .military-chat {
+                height: 400px;
+            }
+            
+            .network-topology-map {
+                height: 350px;
+            }
+        }
+        
+        /* Large screen optimizations */
+        @media (min-width: 1920px) {
+            .container {
+                max-width: 1800px;
+                margin: 0 auto;
+            }
+            
+            .tactical-map {
+                height: 500px;
+            }
+            
+            .military-chat {
+                height: 550px;
+            }
+            
+            .network-topology-map {
+                height: 450px;
+            }
+        }
+        
+        /* Reduced motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .status-online, .status-warning, .status-danger {
+                animation: none;
+            }
+            
+            .battlefield-node, .p2p-node {
+                transition: none;
+            }
+        }
+        
+        /* Enhanced tooltips and interactive elements */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 20, 0, 0.95);
+            color: var(--primary-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: 117%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 255, 136, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::after,
+        .tooltip:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Loading states */
+        .loading {
+            position: relative;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: loadingSpin 1s linear infinite;
+            z-index: 10;
+        }
+        
+        @keyframes loadingSpin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        /* Success animations */
+        .success-pulse {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+            }
+        }
+        
+        /* Error shake animation */
+        .error-shake {
+            animation: errorShake 0.5s ease-in-out;
+        }
+        
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        /* Enhanced focus indicators for accessibility */
+        .control-button:focus,
+        .action-btn:focus,
+        .btn:focus {
+            outline: 2px solid var(--primary-color) !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.2) !important;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary-color: #00ff00 !important;
+                --secondary-color: #ffffff !important;
+                --background-color: #000000 !important;
+            }
+            
+            .military-card,
+            .status-card,
+            .battlefield-container {
+                border-width: 2px !important;
+                border-color: var(--primary-color) !important;
+            }
+        }
+        
+        /* Power saving mode */
+        .power-saving * {
+            animation-duration: 0s !important;
+            transition-duration: 0.1s !important;
+        }
+        
+        /* Slow connection optimizations */
+        .slow-connection .status-online::before,
+        .slow-connection .battlefield-node,
+        .slow-connection .p2p-node {
+            animation: none !important;
+        }
+        
+        .slow-connection .connection-line,
+        .slow-connection .network-connection {
+            opacity: 0.5 !important;
+            animation: none !important;
+        }
+        
+        /* Print styles */
+        @media print {
+            .sidebar,
+            .mobile-menu-btn,
+            .mobile-menu-overlay,
+            .classification-banner {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding: 1rem !important;
+            }
+            
+            .military-card,
+            .status-card {
+                border: 1px solid #000 !important;
+                background: #fff !important;
+                color: #000 !important;
+                page-break-inside: avoid;
+            }
+            
+            .battlefield-container {
+                background: #fff !important;
+                color: #000 !important;
+                border: 2px solid #000 !important;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
-
-<body class="bg-gray-50 text-black font-serif leading-normal tracking-normal">
-
-    <div class="toast toast-top toast-end">
-        <div class="alert alert-info">
-            <span>Hello from daisyUi 👋</span>
-        </div>
+<body>
+    {% block classification_banner %}
+    <div class="classification-banner">
+        🔒 CLASSIFIED - TOP SECRET/SCI - FOR AUTHORIZED PERSONNEL ONLY - NOFORN
     </div>
+    {% endblock %}
 
-<div class="container mx-auto">
-    <section class="flex items-center justify-center h-screen">
-        <h1 class="text-5xl">Django + Tailwind = ❤️</h1>
-    </section>
-</div>
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-btn" class="mobile-nav-toggle lg:hidden" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars" id="mobile-menu-icon"></i>
+    </button>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">SainyaSecure</h1>
+                    <p class="text-xs text-gray-400">Command Center</p>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <div class="space-y-2">
+                {% block sidebar_nav %}
+                <a href="{% url 'dashboard' %}" class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Command Center</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Secure Messaging</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    <span>Personnel</span>
+                    <span class="ml-auto bg-green-500 text-black text-xs px-2 py-1 rounded-full">2847</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Devices</span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <span class="status-online"></span>
+                        <span class="text-xs">156</span>
+                    </div>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-link"></i>
+                    <span>Blockchain</span>
+                    <span class="ml-auto text-yellow-400 text-xs">BETA</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Security</span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <span class="status-online"></span>
+                        <span class="text-xs">AI</span>
+                    </div>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-sync"></i>
+                    <span>P2P Sync</span>
+                    <span class="ml-auto text-blue-400 text-xs">LIVE</span>
+                </a>
+                
+                <div class="border-t border-gray-600 my-4"></div>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security Center</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog"></i>
+                    <span>System Settings</span>
+                </a>
+                {% endblock %}
+            </div>
+        </div>
+        
+        <!-- User Profile -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-600">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">Col. {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}Anonymous{% endif %}</p>
+                    <p class="text-xs text-gray-400">TOP SECRET/SCI</p>
+                </div>
+                <div class="dropdown dropdown-top dropdown-end">
+                    <label tabindex="0" class="btn btn-ghost btn-sm">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </label>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mb-2">
+                        <li><a href="#"><i class="fas fa-user mr-2"></i> Profile</a></li>
+                        <li><a href="#"><i class="fas fa-cog mr-2"></i> Settings</a></li>
+                        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Top Header -->
+    <header class="top-header with-banner">
+        <div class="flex items-center gap-4">
+            <h2 class="text-xl font-bold text-white">{% block page_title %}Command Center{% endblock %}</h2>
+            {% block breadcrumbs %}{% endblock %}
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- System Status -->
+            <div class="flex items-center gap-2">
+                <span class="status-online tooltip" data-tooltip="All Systems Operational"></span>
+                <span class="text-sm text-gray-300">SECURE</span>
+            </div>
+
+            <!-- Notifications -->
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-circle">
+                    <div class="indicator">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="badge badge-sm badge-primary indicator-item">3</span>
+                    </div>
+                </label>
+                <div tabindex="0" class="dropdown-content card card-compact w-80 p-2 shadow bg-base-100">
+                    <div class="card-body">
+                        <h3 class="card-title text-sm">Security Alerts</h3>
+                        <div class="space-y-2">
+                            <div class="alert alert-success alert-sm">
+                                <i class="fas fa-check-circle"></i>
+                                <span class="text-xs">System backup completed</span>
+                            </div>
+                            <div class="alert alert-warning alert-sm">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span class="text-xs">3 devices need security updates</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="hidden md:block">
+                <div class="form-control">
+                    <input type="text" placeholder="Search..." class="input input-sm bg-gray-700 border-gray-600 w-64" />
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-2">
+                <button class="btn btn-sm btn-military tooltip" data-tooltip="Emergency Alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary tooltip" data-tooltip="Quick Message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content with-banner">
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-2">
+                <span>{{ message }}</span>
+                <button class="btn btn-sm btn-ghost" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Enhanced Mobile Navigation
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const icon = document.getElementById('mobile-menu-icon');
+            
+            if (sidebar && sidebar.classList.contains('mobile-open')) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+        
+        function openMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const icon = document.getElementById('mobile-menu-icon');
+            
+            if (sidebar) sidebar.classList.add('mobile-open');
+            if (overlay) overlay.classList.add('active');
+            if (icon) icon.className = 'fas fa-times';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const icon = document.getElementById('mobile-menu-icon');
+            
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (overlay) overlay.classList.remove('active');
+            if (icon) icon.className = 'fas fa-bars';
+            document.body.style.overflow = '';
+        }
+        
+        // Initialize mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up mobile menu button
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            if (mobileBtn) {
+                mobileBtn.onclick = toggleMobileMenu;
+            }
+            
+            // Set up overlay click to close
+            const overlay = document.getElementById('mobile-menu-overlay');
+            if (overlay) {
+                overlay.onclick = closeMobileMenu;
+            }
+            
+            // Close mobile menu on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    closeMobileMenu();
+                }
+            });
+            
+            // Enhanced viewport management for mobile
+            function handleViewportResize() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            }
+            
+            window.addEventListener('resize', handleViewportResize);
+            window.addEventListener('orientationchange', handleViewportResize);
+            handleViewportResize();
+            
+            // Touch device optimization
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.body.classList.add('touch-device');
+            }
+        });
+        
+        // Touch gesture support for mobile menu
+        let startX = 0;
+        let isSwipeInProgress = false;
+        
+        document.addEventListener('touchstart', function(e) {
+            if (window.innerWidth <= 768) {
+                startX = e.touches[0].clientX;
+                isSwipeInProgress = true;
+            }
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            if (!isSwipeInProgress || window.innerWidth > 768) return;
+            
+            const currentX = e.touches[0].clientX;
+            const diffX = currentX - startX;
+            
+            // Swipe right from left edge to open menu
+            if (startX < 50 && diffX > 100) {
+                openMobileMenu();
+                isSwipeInProgress = false;
+            }
+            
+            // Swipe left to close menu when open
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('mobile-open') && diffX < -100) {
+                closeMobileMenu();
+                isSwipeInProgress = false;
+            }
+        });
+        
+        document.addEventListener('touchend', function() {
+            isSwipeInProgress = false;
+        });
+        
+        // Real-time updates and system stats
+        function updateSystemStats() {
+            fetch('/api/system-stats/')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('System stats updated:', data);
+                    
+                    // Update UI elements with new data
+                    if (data.active_users) {
+                        const userCountElements = document.querySelectorAll('.user-count');
+                        userCountElements.forEach(el => el.textContent = data.active_users);
+                    }
+                    
+                    if (data.system_status) {
+                        const statusElements = document.querySelectorAll('.system-status');
+                        statusElements.forEach(el => {
+                            el.className = `system-status status-${data.system_status}`;
+                            el.textContent = data.system_status.toUpperCase();
+                        });
+                    }
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }
+        
+        // Update time display
+        function updateTime() {
+            const timeElements = document.querySelectorAll('.current-time');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            timeElements.forEach(element => {
+                element.textContent = timeString;
+            });
+        }
+        
+        // Military alert system
+        function showMilitaryAlert(message, type = 'info') {
+            const alertContainer = document.createElement('div');
+            alertContainer.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg border-l-4 max-w-sm shadow-lg backdrop-blur-sm';
+            
+            const typeClasses = {
+                success: 'bg-green-900/90 border-green-400 text-green-100',
+                warning: 'bg-yellow-900/90 border-yellow-400 text-yellow-100',
+                error: 'bg-red-900/90 border-red-400 text-red-100',
+                info: 'bg-blue-900/90 border-blue-400 text-blue-100'
+            };
+            
+            const typeIcons = {
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle',
+                info: 'fa-info-circle'
+            };
+            
+            alertContainer.className += ' ' + (typeClasses[type] || typeClasses.info);
+            
+            alertContainer.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${typeIcons[type] || typeIcons.info} mr-3 text-lg"></i>
+                    <span class="text-sm">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-current opacity-70 hover:opacity-100">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            alertContainer.style.transform = 'translateX(100%)';
+            alertContainer.style.transition = 'transform 0.3s ease-out';
+            
+            document.body.appendChild(alertContainer);
+            
+            // Animate in
+            setTimeout(() => {
+                alertContainer.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertContainer.parentNode) {
+                    alertContainer.style.transform = 'translateX(100%)';
+                    setTimeout(() => alertContainer.remove(), 300);
+                }
+            }, 5000);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Escape key closes mobile menu and modals
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+                
+                // Close any open modals
+                const modals = document.querySelectorAll('.modal.active');
+                modals.forEach(modal => modal.classList.remove('active'));
+            }
+            
+            // Ctrl+M or Cmd+M toggles mobile menu
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                toggleMobileMenu();
+            }
+            
+            // Alt+H shows help
+            if (e.altKey && e.key === 'h') {
+                e.preventDefault();
+                showMilitaryAlert('Keyboard shortcuts: Esc (close), Ctrl+M (menu), Alt+H (help)', 'info');
+            }
+        });
+        
+        // Performance optimization for low-end devices
+        function optimizePerformance() {
+            if (window.innerWidth <= 768) {
+                // Reduce animation complexity on mobile
+                document.documentElement.style.setProperty('--animation-speed', '0.2s');
+                
+                // Pause heavy animations until needed
+                const heavyAnimations = document.querySelectorAll('.status-online, .battlefield-node, .p2p-node, .connection-line');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.animationPlayState = 'running';
+                        } else {
+                            entry.target.style.animationPlayState = 'paused';
+                        }
+                    });
+                });
+                
+                heavyAnimations.forEach(element => {
+                    element.style.animationPlayState = 'paused';
+                    observer.observe(element);
+                });
+            }
+        }
+        
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('SainyaSecure Command Center Initialized');
+            
+            // Initialize tooltips
+            const tooltipElements = document.querySelectorAll('[title]');
+            tooltipElements.forEach(element => {
+                const title = element.getAttribute('title');
+                element.setAttribute('data-tooltip', title);
+                element.removeAttribute('title');
+                element.classList.add('tooltip');
+            });
+            
+            // Add loading states to buttons
+            const buttons = document.querySelectorAll('.control-button, .action-btn, .btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (!this.classList.contains('loading')) {
+                        this.classList.add('loading');
+                        setTimeout(() => {
+                            this.classList.remove('loading');
+                            this.classList.add('success-pulse');
+                            setTimeout(() => this.classList.remove('success-pulse'), 600);
+                        }, Math.random() * 1000 + 500);
+                    }
+                });
+            });
+            
+            // Enhanced form validation with visual feedback
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const requiredFields = this.querySelectorAll('[required]');
+                    let hasErrors = false;
+                    
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            field.classList.add('error-shake');
+                            field.style.borderColor = '#ff4757';
+                            hasErrors = true;
+                            
+                            setTimeout(() => {
+                                field.classList.remove('error-shake');
+                                field.style.borderColor = '';
+                            }, 500);
+                        }
+                    });
+                    
+                    if (hasErrors) {
+                        e.preventDefault();
+                        showMilitaryAlert('Please fill in all required fields', 'error');
+                    }
+                });
+            });
+            
+            // Start time updates
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Start system stats updates
+            updateSystemStats();
+            setInterval(updateSystemStats, 30000);
+            
+            // Optimize performance
+            optimizePerformance();
+            
+            // Show initialization success
+            setTimeout(() => {
+                showMilitaryAlert('Command Center Online - All Systems Operational', 'success');
+            }, 1000);
+        });
+        
+        // Global functions for templates to use
+        window.SainyaSecure = {
+            showAlert: showMilitaryAlert,
+            toggleMobileMenu: toggleMobileMenu,
+            closeMobileMenu: closeMobileMenu,
+            updateStats: updateSystemStats
+        };
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

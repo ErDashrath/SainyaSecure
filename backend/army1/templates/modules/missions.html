@@ -1,0 +1,294 @@
+{% extends 'modules/base_module.html' %}
+{% load static %}
+
+{% block title %}Mission Control - {{ module_name }}{% endblock %}
+
+{% block module_header %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-primary">{{ module_name }}</h1>
+    <button onclick="openCreateMissionModal()" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+        CREATE MISSION
+    </button>
+</div>
+{% endblock %}
+
+{% block module_content %}
+<div class="grid grid-cols-1 gap-6">
+    <!-- Mission Statistics -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">MISSION OVERVIEW</h3>
+        <div class="grid grid-cols-4 gap-4 text-center">
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-primary text-xl font-bold">{{ mission_stats.total }}</div>
+                <div class="text-gray-300 text-sm">TOTAL</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-yellow-800">
+                <div class="text-yellow-400 text-xl font-bold">{{ mission_stats.planning }}</div>
+                <div class="text-gray-300 text-sm">PLANNING</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-blue-800">
+                <div class="text-blue-400 text-xl font-bold">{{ mission_stats.in_progress }}</div>
+                <div class="text-gray-300 text-sm">ACTIVE</div>
+            </div>
+            <div class="bg-gray-900 p-3 rounded border border-green-800">
+                <div class="text-green-400 text-xl font-bold">{{ mission_stats.completed }}</div>
+                <div class="text-gray-300 text-sm">COMPLETED</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Missions -->
+    <div class="bg-black border border-primary rounded-lg p-4">
+        <h3 class="text-lg font-bold text-primary mb-4">MISSION STATUS BOARD</h3>
+        
+        {% if missions %}
+        <div class="space-y-4">
+            {% for mission in missions %}
+            <div class="bg-gray-900 border border-gray-700 rounded-lg p-4 hover:border-primary transition-colors">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h4 class="text-lg font-bold text-white">{{ mission.mission_name }}</h4>
+                            <span class="px-2 py-1 rounded text-xs font-bold bg-gray-800 text-gray-300">{{ mission.mission_code }}</span>
+                            <span class="px-2 py-1 rounded text-xs font-bold 
+                                {% if mission.classification == 'TOP_SECRET' %}bg-red-900 text-red-300
+                                {% elif mission.classification == 'SECRET' %}bg-red-900 text-red-400
+                                {% elif mission.classification == 'CONFIDENTIAL' %}bg-yellow-900 text-yellow-400
+                                {% else %}bg-gray-800 text-gray-300{% endif %}">
+                                {{ mission.get_classification_display }}
+                            </span>
+                        </div>
+                        <p class="text-gray-300 text-sm mb-2">{{ mission.description|truncatewords:20 }}</p>
+                        <div class="flex items-center gap-4 text-xs text-gray-400">
+                            <span><i class="fas fa-user mr-1"></i>CMD: {{ mission.commander.first_name }} {{ mission.commander.last_name }}</span>
+                            <span><i class="fas fa-map-marker-alt mr-1"></i>{{ mission.location }}</span>
+                            <span><i class="fas fa-calendar mr-1"></i>{{ mission.start_date|date:"M d, Y H:i" }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded text-xs font-bold 
+                            {% if mission.status == 'PLANNING' %}bg-yellow-900 text-yellow-400
+                            {% elif mission.status == 'IN_PROGRESS' %}bg-blue-900 text-blue-400
+                            {% elif mission.status == 'COMPLETED' %}bg-green-900 text-green-400
+                            {% elif mission.status == 'CANCELLED' %}bg-red-900 text-red-400
+                            {% else %}bg-gray-900 text-gray-400{% endif %}">
+                            {{ mission.get_status_display }}
+                        </span>
+                        <div class="flex gap-1">
+                            <button onclick="viewMission('{{ mission.mission_id }}')" class="text-primary hover:text-green-400 p-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editMission('{{ mission.mission_id }}')" class="text-blue-400 hover:text-blue-300 p-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            {% if mission.status != 'COMPLETED' %}
+                            <button onclick="updateMissionStatus('{{ mission.mission_id }}')" class="text-yellow-400 hover:text-yellow-300 p-2">
+                                <i class="fas fa-flag"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mission Progress Bar -->
+                <div class="w-full bg-gray-800 rounded-full h-2">
+                    <div class="bg-primary h-2 rounded-full" style="width: 
+                        {% if mission.status == 'PLANNING' %}25%
+                        {% elif mission.status == 'IN_PROGRESS' %}60%
+                        {% elif mission.status == 'COMPLETED' %}100%
+                        {% else %}0%{% endif %}">
+                    </div>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">
+                    Progress: {% if mission.status == 'PLANNING' %}Planning Phase
+                    {% elif mission.status == 'IN_PROGRESS' %}In Progress
+                    {% elif mission.status == 'COMPLETED' %}Mission Complete
+                    {% else %}{{ mission.get_status_display }}{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <div class="text-gray-400 mb-4">No missions found</div>
+            <button onclick="openCreateMissionModal()" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">
+                CREATE FIRST MISSION
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Mission Modal -->
+<div id="createMissionModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">CREATE NEW MISSION</h3>
+            <button onclick="closeCreateMissionModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_mission">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Mission Name</label>
+                    <input type="text" name="mission_name" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Mission Code</label>
+                    <input type="text" name="mission_code" required placeholder="e.g., OP-PHOENIX-001" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Description</label>
+                <textarea name="description" rows="3" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Classification</label>
+                    <select name="classification" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for class_code, class_display in classification_choices %}
+                        <option value="{{ class_code }}">{{ class_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Status</label>
+                    <select name="status" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        {% for status_code, status_display in status_choices %}
+                        <option value="{{ status_code }}">{{ status_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Commander Rank</label>
+                    <select name="commander_rank" class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                        <option value="COMMAND">COMMAND</option>
+                        <option value="OPERATIONS">OPERATIONS</option>
+                        <option value="INTELLIGENCE">INTELLIGENCE</option>
+                        <option value="FIELD">FIELD</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Commander Name</label>
+                    <input type="text" name="commander_name" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-primary text-sm font-bold mb-2">Location</label>
+                    <input type="text" name="location" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Start Date & Time</label>
+                <input type="datetime-local" name="start_date" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Mission Objectives</label>
+                <textarea name="objectives" rows="4" required placeholder="List the primary objectives of this mission..." class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Resources Required</label>
+                <textarea name="resources_required" rows="3" required placeholder="Personnel, equipment, vehicles, etc..." class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-primary text-sm font-bold mb-2">Risk Assessment</label>
+                <textarea name="risk_assessment" rows="3" placeholder="Identify potential risks and mitigation strategies..." class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeCreateMissionModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">CREATE MISSION</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div id="updateStatusModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-primary rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-primary">UPDATE MISSION STATUS</h3>
+            <button onclick="closeUpdateStatusModal()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_mission_status">
+            <input type="hidden" name="mission_id" id="updateMissionId">
+            
+            <div class="mb-4">
+                <label class="block text-primary text-sm font-bold mb-2">New Status</label>
+                <select name="new_status" required class="w-full bg-black border border-green-800 text-white p-2 rounded focus:border-primary">
+                    {% for status_code, status_display in status_choices %}
+                    <option value="{{ status_code }}">{{ status_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="closeUpdateStatusModal()" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">CANCEL</button>
+                <button type="submit" class="bg-primary hover:bg-green-600 text-black px-4 py-2 rounded font-bold">UPDATE</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_scripts %}
+<script>
+function openCreateMissionModal() {
+    document.getElementById('createMissionModal').classList.remove('hidden');
+}
+
+function closeCreateMissionModal() {
+    document.getElementById('createMissionModal').classList.add('hidden');
+}
+
+function openUpdateStatusModal() {
+    document.getElementById('updateStatusModal').classList.remove('hidden');
+}
+
+function closeUpdateStatusModal() {
+    document.getElementById('updateStatusModal').classList.add('hidden');
+}
+
+function viewMission(missionId) {
+    alert('View mission functionality - Mission ID: ' + missionId);
+    // TODO: Implement view modal
+}
+
+function editMission(missionId) {
+    alert('Edit mission functionality - Mission ID: ' + missionId);
+    // TODO: Implement edit modal
+}
+
+function updateMissionStatus(missionId) {
+    document.getElementById('updateMissionId').value = missionId;
+    openUpdateStatusModal();
+}
+
+// Close modals when clicking outside
+document.getElementById('createMissionModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCreateMissionModal();
+    }
+});
+
+document.getElementById('updateStatusModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeUpdateStatusModal();
+    }
+});
+</script>
+{% endblock %}

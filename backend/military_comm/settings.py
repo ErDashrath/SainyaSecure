@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'blockchain',     # Blockchain interface for immutable logs
     'ai_anomaly',     # NLP/ML detection of suspicious messages
     'dashboard',      # Endpoints for React/Next.js dashboard views
+    'command_center', # Master authority command center with full access control
 ]
 
 MIDDLEWARE = [
@@ -71,7 +72,10 @@ ROOT_URLCONF = 'military_comm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR.parent / 'frontend' / 'templates'],
+        'DIRS': [
+            BASE_DIR.parent / 'frontend' / 'templates',
+            BASE_DIR / 'army1' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -195,14 +199,17 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# Custom settings for Military Communication System
+# Custom settings for Military Communication System with Enhanced Crypto Libraries
 MILITARY_COMM_SETTINGS = {
-    # Encryption settings
-    'ENCRYPTION_ALGORITHM': 'AES-256-GCM',
-    'KEY_EXCHANGE_ALGORITHM': 'RSA-2048',
+    # Enhanced encryption settings using new libraries
+    'ENCRYPTION_ALGORITHM': 'AES-256-GCM',    # Using pycryptodome
+    'KEY_EXCHANGE_ALGORITHM': 'RSA-4096',     # Upgraded to military standard
+    'SIGNATURE_ALGORITHM': 'RSA-PSS-SHA256',  # Using cryptography library
+    'USE_MERKLE_TREES': True,                 # merkletools library
+    'MINING_DIFFICULTY': 4,                   # Enhanced proof-of-work
     
-    # Blockchain settings
-    'BLOCKCHAIN_NETWORK': 'private',  # private, testnet, mainnet
+    # Blockchain settings with library optimization
+    'BLOCKCHAIN_NETWORK': 'private',          # private, testnet, mainnet
     'BLOCKCHAIN_RPC_URL': 'http://127.0.0.1:8545',  # Ganache local blockchain
     
     # AI Anomaly Detection settings
@@ -273,3 +280,8 @@ TAILWIND_APP_NAME = 'army1'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# Authentication URLs
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'

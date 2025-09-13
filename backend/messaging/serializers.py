@@ -212,9 +212,9 @@ class MessageSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
     
     def _generate_content_hash(self, content):
-        """Generate SHA-256 hash of content"""
-        import hashlib
-        return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        """Generate SHA-256 hash of content using military crypto utilities"""
+        from utils.military_crypto import military_blockchain
+        return military_blockchain.calculate_block_hash({'content': content})
 
 
 class MessageDeliverySerializer(serializers.ModelSerializer):

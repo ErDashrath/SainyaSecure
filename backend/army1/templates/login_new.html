@@ -1,0 +1,197 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Secure Login - SainyaSecure{% endblock %}
+{% block page_title %}Secure Authentication{% endblock %}
+
+{% block classification_banner %}
+<!-- Override for login page -->
+{% endblock %}
+
+{% block content %}
+<!-- Override layout for login page -->
+</main>
+
+<!-- Full-screen login layout -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Login Card -->
+        <div class="military-card p-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
+                    <i class="fas fa-shield-alt text-2xl text-white"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2">Secure Access</h1>
+                <p class="text-gray-400">SainyaSecure Military Communication System</p>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-red-400 mt-1"></i>
+                    <div>
+                        <h4 class="text-red-400 font-bold text-sm mb-1">CLASSIFIED SYSTEM</h4>
+                        <p class="text-red-300 text-xs">
+                            This system is restricted to authorized personnel only. 
+                            All activities are monitored and logged.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Military ID -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <i class="fas fa-id-card mr-2"></i>
+                        Military ID / Username
+                    </label>
+                    <input type="text" name="username" 
+                           class="input w-full bg-gray-700 border-gray-600 focus:border-green-400 focus:ring-1 focus:ring-green-400" 
+                           placeholder="Enter your military ID" required>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <i class="fas fa-lock mr-2"></i>
+                        Secure Password
+                    </label>
+                    <div class="relative">
+                        <input type="password" name="password" id="password"
+                               class="input w-full bg-gray-700 border-gray-600 focus:border-green-400 focus:ring-1 focus:ring-green-400 pr-12" 
+                               placeholder="Enter your password" required>
+                        <button type="button" onclick="togglePassword()" 
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2FA Code -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-2">
+                        <i class="fas fa-mobile-alt mr-2"></i>
+                        Two-Factor Authentication Code (Optional)
+                    </label>
+                    <input type="text" name="otp_code" maxlength="6"
+                           class="input w-full bg-gray-700 border-gray-600 focus:border-green-400 focus:ring-1 focus:ring-green-400" 
+                           placeholder="000000">
+                    <p class="text-xs text-gray-500 mt-1">Enter 6-digit code from your authenticator app</p>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="remember_me" class="checkbox checkbox-sm">
+                        <span class="text-sm text-gray-300">Remember this device</span>
+                    </label>
+                    <a href="#" class="text-sm text-blue-400 hover:text-blue-300">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-military w-full btn-lg">
+                    <i class="fas fa-shield-alt mr-2"></i>
+                    SECURE LOGIN
+                </button>
+            </form>
+
+            <!-- System Status -->
+            <div class="mt-6 pt-6 border-t border-gray-600">
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="status-online"></span>
+                        <span class="text-gray-300">System Status: <span class="text-green-400 font-semibold">SECURE</span></span>
+                    </div>
+                    <div class="text-gray-400">
+                        Build 20241215
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-6 text-center">
+            <div class="military-card p-4">
+                <h3 class="text-lg font-bold text-white mb-3">Access Requirements</h3>
+                <div class="space-y-2 text-sm text-gray-300">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-green-400"></i>
+                        <span>Valid military credentials required</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-green-400"></i>
+                        <span>Security clearance verification</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-green-400"></i>
+                        <span>Multi-factor authentication recommended</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="mt-4">
+            <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                <h4 class="text-red-400 font-bold mb-2 text-center">
+                    <i class="fas fa-phone mr-2"></i>
+                    Emergency Access
+                </h4>
+                <p class="text-sm text-red-300 text-center">
+                    For urgent system access or security issues:
+                </p>
+                <p class="text-red-400 font-bold text-lg text-center mt-1">
+                    +1 (800) SECURE-1
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 text-center text-xs text-gray-500">
+            <p class="mb-2">
+                <i class="fas fa-lock mr-1"></i>
+                CLASSIFIED - FOR AUTHORIZED PERSONNEL ONLY
+            </p>
+            <p>SainyaSecure v2.4.1 • © 2025 Military Communications Division</p>
+        </div>
+    </div>
+</div>
+
+<main class="main-content">
+<!-- Resume normal layout -->
+
+<script>
+function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        toggleIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordField.type = 'password';
+        toggleIcon.className = 'fas fa-eye';
+    }
+}
+
+// Auto-focus on username field
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('input[name="username"]').focus();
+});
+
+// Format OTP input
+document.querySelector('input[name="otp_code"]').addEventListener('input', function(e) {
+    // Only allow numbers
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    // Limit to 6 digits
+    if (this.value.length > 6) {
+        this.value = this.value.slice(0, 6);
+    }
+});
+</script>
+{% endblock %}

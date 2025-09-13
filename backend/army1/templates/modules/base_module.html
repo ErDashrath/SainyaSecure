@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ module_name }} - SainyaSecure{% endblock %}
+
+{% block page_title %}{{ module_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="#">Modules</a></li>
+        <li>{{ module_name }}</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% extends 'base.html' %}
+
+{% block title %}{{ module_name }} - SainyaSecure Military System{% endblock %}
+
+{% block page_title %}{{ module_name }} - MILITARY MODULE{% endblock %}
+
+{% block breadcrumbs %}
+<div class="flex items-center text-sm text-gray-400 mb-4">
+    <i class="fas fa-home text-primary mr-2"></i>
+    <a href="{% url 'dashboard' %}" class="text-primary hover:text-green-400">Command Center</a>
+    <i class="fas fa-chevron-right mx-2 text-gray-500"></i>
+    <a href="#" class="text-primary hover:text-green-400">Tactical Modules</a>
+    <i class="fas fa-chevron-right mx-2 text-gray-500"></i>
+    <span class="text-white">{{ module_name }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Military Module Header -->
+<div class="battlefield-container p-6 mb-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-{% block module_icon %}shield-alt{% endblock %} text-2xl text-white"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-primary">{{ module_name|upper }}</h2>
+                <p class="text-gray-300">{{ description }}</p>
+                <div class="flex items-center gap-4 mt-2">
+                    <span class="text-xs bg-info bg-opacity-20 text-info px-3 py-1 rounded-full">
+                        <i class="fas fa-star mr-1"></i>{{ rank_required }} CLEARANCE
+                    </span>
+                    <span class="text-xs bg-{% block status_color %}success{% endblock %} bg-opacity-20 text-{% block status_color %}success{% endblock %} px-3 py-1 rounded-full">
+                        {% block module_status %}🟢 OPERATIONAL{% endblock %}
+                    </span>
+                    <span class="text-xs text-gray-400">Last sync: {{ current_time|date:"H:i:s" }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="status-online"></div>
+            <span class="text-sm text-success font-mono">SECURE ACCESS GRANTED</span>
+        </div>
+    </div>
+</div>
+
+<!-- Module Content Area -->
+<div class="battlefield-container p-6 mb-8">
+    {% block module_content %}
+    <div class="text-center py-16">
+        <div class="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-{% block module_icon_large %}tools{% endblock %} text-4xl text-white"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-primary mb-4">TACTICAL MODULE DEVELOPMENT</h2>
+        <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+            The <span class="text-primary font-semibold">{{ module_name }}</span> tactical module is currently in active development. 
+            This advanced military-grade system will provide comprehensive operational capabilities including 
+            secure data management, real-time tactical updates, and enhanced battlefield coordination.
+        </p>
+        
+        <!-- Development Status -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-primary border-opacity-20">
+                <i class="fas fa-code text-primary text-2xl mb-3"></i>
+                <div class="text-lg font-bold text-white">Core Systems</div>
+                <div class="text-sm text-success">85% Complete</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-warning border-opacity-20">
+                <i class="fas fa-shield-alt text-warning text-2xl mb-3"></i>
+                <div class="text-lg font-bold text-white">Security Layer</div>
+                <div class="text-sm text-warning">70% Complete</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4 border border-info border-opacity-20">
+                <i class="fas fa-satellite text-info text-2xl mb-3"></i>
+                <div class="text-lg font-bold text-white">Field Testing</div>
+                <div class="text-sm text-info">Planning Phase</div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-center gap-4">
+            <button class="control-button" onclick="requestModuleAccess()">
+                <i class="fas fa-rocket mr-2"></i>
+                REQUEST PRIORITY ACCESS
+            </button>
+            <a href="{% url 'dashboard' %}" class="control-button secondary">
+                <i class="fas fa-arrow-left mr-2"></i>
+                RETURN TO COMMAND CENTER
+            </a>
+            <button class="control-button info" onclick="viewModuleRoadmap()">
+                <i class="fas fa-map mr-2"></i>
+                DEVELOPMENT ROADMAP
+            </button>
+        </div>
+    </div>
+    {% endblock %}
+</div>
+
+<!-- Military Module Operations -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {% block module_actions %}
+    <!-- Primary Operations -->
+    <div class="battlefield-container p-6 text-center border-2 border-primary">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-plus-circle text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">CREATE OPERATIONS</h4>
+        <p class="text-sm text-gray-400 mb-4">Initialize new tactical operations and mission parameters</p>
+        <button class="control-button w-full" onclick="showModuleFeature('create')">
+            <i class="fas fa-plus mr-2"></i>
+            TACTICAL DEPLOYMENT
+        </button>
+        <div class="text-xs text-success mt-2">
+            <i class="fas fa-check-circle mr-1"></i>
+            Advanced CRUD Operations
+        </div>
+    </div>
+    
+    <!-- Intelligence Operations -->
+    <div class="battlefield-container p-6 text-center border-2 border-info">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-search text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">INTELLIGENCE REVIEW</h4>
+        <p class="text-sm text-gray-400 mb-4">Access and analyze tactical intelligence and field reports</p>
+        <button class="control-button info w-full" onclick="showModuleFeature('intel')">
+            <i class="fas fa-eye mr-2"></i>
+            TACTICAL ANALYSIS
+        </button>
+        <div class="text-xs text-info mt-2">
+            <i class="fas fa-database mr-1"></i>
+            Real-time Data Processing
+        </div>
+    </div>
+    
+    <!-- Command Analytics -->
+    <div class="battlefield-container p-6 text-center border-2 border-warning">
+        <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chart-line text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">COMMAND ANALYTICS</h4>
+        <p class="text-sm text-gray-400 mb-4">Strategic reports and battlefield performance metrics</p>
+        <button class="control-button warning w-full" onclick="showModuleFeature('analytics')">
+            <i class="fas fa-chart-bar mr-2"></i>
+            STRATEGIC REPORTS
+        </button>
+        <div class="text-xs text-warning mt-2">
+            <i class="fas fa-tachometer-alt mr-1"></i>
+            Advanced Reporting Suite
+        </div>
+    </div>
+    {% endblock %}
+</div>
+
+<!-- Module Features Preview -->
+<div class="battlefield-container p-6 mt-8">
+    <h3 class="text-xl font-bold text-primary mb-6 flex items-center gap-3">
+        <i class="fas fa-cog"></i>
+        PLANNED TACTICAL CAPABILITIES
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="feature-preview">
+            <i class="fas fa-lock text-primary mb-2"></i>
+            <div class="text-sm font-semibold text-white">Military-Grade Security</div>
+            <div class="text-xs text-gray-400">AES-256 encryption with multi-factor authentication</div>
+        </div>
+        
+        <div class="feature-preview">
+            <i class="fas fa-satellite-dish text-success mb-2"></i>
+            <div class="text-sm font-semibold text-white">Real-time Communications</div>
+            <div class="text-xs text-gray-400">Secure P2P messaging and broadcast systems</div>
+        </div>
+        
+        <div class="feature-preview">
+            <i class="fas fa-users text-info mb-2"></i>
+            <div class="text-sm font-semibold text-white">Role-Based Access</div>
+            <div class="text-xs text-gray-400">Hierarchical permissions based on military rank</div>
+        </div>
+        
+        <div class="feature-preview">
+            <i class="fas fa-mobile-alt text-warning mb-2"></i>
+            <div class="text-sm font-semibold text-white">Mobile Operations</div>
+            <div class="text-xs text-gray-400">Field-optimized interface for tactical devices</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced Military Module JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMilitaryModule();
+    startModuleUpdates();
+});
+
+function initializeMilitaryModule() {
+    console.log('{{ module_name }} tactical module initialized');
+    
+    // Add military-style loading animations
+    const features = document.querySelectorAll('.feature-preview');
+    features.forEach((feature, index) => {
+        setTimeout(() => {
+            feature.style.opacity = '1';
+            feature.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Initialize module-specific features
+    {% block module_js %}{% endblock %}
+}
+
+function startModuleUpdates() {
+    // Simulate real-time module status updates
+    setInterval(() => {
+        updateModuleStatus();
+    }, 10000);
+}
+
+function updateModuleStatus() {
+    const statusElement = document.querySelector('.status-online');
+    if (statusElement) {
+        statusElement.style.animation = 'pulse 1s ease-in-out';
+        setTimeout(() => {
+            statusElement.style.animation = '';
+        }, 1000);
+    }
+}
+
+function requestModuleAccess() {
+    // Enhanced access request with military styling
+    const modal = createMilitaryModal({
+        title: '🎖️ PRIORITY ACCESS REQUEST',
+        content: `
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-rocket text-2xl text-white"></i>
+                </div>
+                <h3 class="text-xl font-bold text-primary mb-4">{{ module_name|upper }} MODULE ACCESS</h3>
+                <p class="text-gray-300 mb-6">
+                    Requesting priority access to the <strong class="text-primary">{{ module_name }}</strong> tactical module.
+                    This advanced military system includes:
+                </p>
+                <div class="text-left space-y-2 mb-6">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span class="text-sm">Real-time tactical operations management</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span class="text-sm">Advanced security and encryption protocols</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span class="text-sm">Role-based access control system</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-check text-success"></i>
+                        <span class="text-sm">Comprehensive reporting and analytics</span>
+                    </div>
+                </div>
+                <div class="bg-yellow-500 bg-opacity-10 border border-yellow-500 rounded-lg p-4 mb-6">
+                    <p class="text-yellow-400 text-sm">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Note:</strong> Access will be granted upon completion of development phase. 
+                        Estimated deployment: Next major system update.
+                    </p>
+                </div>
+            </div>
+        `,
+        buttons: [
+            {
+                text: 'SUBMIT REQUEST',
+                class: 'control-button',
+                onclick: 'submitAccessRequest()'
+            },
+            {
+                text: 'CANCEL',
+                class: 'control-button secondary',
+                onclick: 'closeModal()'
+            }
+        ]
+    });
+    
+    document.body.appendChild(modal);
+}
+
+function viewModuleRoadmap() {
+    const modal = createMilitaryModal({
+        title: '🗺️ DEVELOPMENT ROADMAP',
+        content: `
+            <div>
+                <h3 class="text-xl font-bold text-primary mb-6">{{ module_name|upper }} TACTICAL DEVELOPMENT</h3>
+                
+                <div class="space-y-4">
+                    <div class="roadmap-item completed">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 bg-success rounded-full flex items-center justify-center">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">Phase 1: Core Architecture</div>
+                                <div class="text-xs text-gray-400">Database design, security framework, API structure</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item in-progress">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 bg-warning rounded-full flex items-center justify-center">
+                                <i class="fas fa-cog text-xs text-white animate-spin"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">Phase 2: User Interface Development</div>
+                                <div class="text-xs text-gray-400">Military-themed UI, responsive design, accessibility</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item pending">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 bg-info rounded-full flex items-center justify-center">
+                                <i class="fas fa-clock text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">Phase 3: Security Integration</div>
+                                <div class="text-xs text-gray-400">P2P encryption, multi-factor auth, audit trails</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item pending">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-flask text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">Phase 4: Field Testing</div>
+                                <div class="text-xs text-gray-400">Beta testing, performance optimization, bug fixes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item pending">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-rocket text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">Phase 5: Production Deployment</div>
+                                <div class="text-xs text-gray-400">Full release, training materials, documentation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-primary bg-opacity-10 border border-primary rounded-lg">
+                    <p class="text-primary text-sm">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Estimated Completion:</strong> Q2 2024 • 
+                        <strong>Current Phase:</strong> 2 of 5 • 
+                        <strong>Progress:</strong> 65%
+                    </p>
+                </div>
+            </div>
+        `,
+        buttons: [
+            {
+                text: 'CLOSE',
+                class: 'control-button',
+                onclick: 'closeModal()'
+            }
+        ]
+    });
+    
+    document.body.appendChild(modal);
+}
+
+function showModuleFeature(feature) {
+    const featureNames = {
+        'create': 'TACTICAL DEPLOYMENT SYSTEM',
+        'intel': 'INTELLIGENCE ANALYSIS SUITE',
+        'analytics': 'STRATEGIC COMMAND REPORTS'
+    };
+    
+    const featureDescriptions = {
+        'create': 'Advanced system for creating and managing tactical operations, mission parameters, and field deployment strategies.',
+        'intel': 'Comprehensive intelligence gathering and analysis tools with real-time data processing and threat assessment capabilities.',
+        'analytics': 'Strategic reporting suite providing detailed battlefield analytics, performance metrics, and command insights.'
+    };
+    
+    const modal = createMilitaryModal({
+        title: `🎯 ${featureNames[feature]}`,
+        content: `
+            <div class="text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-${feature === 'create' ? 'plus-circle' : feature === 'intel' ? 'search' : 'chart-line'} text-3xl text-white"></i>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-primary mb-4">${featureNames[feature]}</h3>
+                
+                <p class="text-gray-300 mb-6">${featureDescriptions[feature]}</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-gray-800 bg-opacity-50 rounded-lg">
+                        <i class="fas fa-shield-alt text-success text-2xl mb-3"></i>
+                        <div class="text-sm font-semibold text-white">Security First</div>
+                        <div class="text-xs text-gray-400">Military-grade encryption and access controls</div>
+                    </div>
+                    
+                    <div class="p-4 bg-gray-800 bg-opacity-50 rounded-lg">
+                        <i class="fas fa-bolt text-warning text-2xl mb-3"></i>
+                        <div class="text-sm font-semibold text-white">Real-time Updates</div>
+                        <div class="text-xs text-gray-400">Live data synchronization across all units</div>
+                    </div>
+                </div>
+                
+                <div class="bg-red-500 bg-opacity-10 border border-red-500 rounded-lg p-4">
+                    <p class="text-red-400 text-sm">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Development Status:</strong> This feature is currently under active development. 
+                        Full functionality will be available in the next system update.
+                    </p>
+                </div>
+            </div>
+        `,
+        buttons: [
+            {
+                text: 'NOTIFY WHEN READY',
+                class: 'control-button warning',
+                onclick: 'subscribeToUpdates("' + feature + '")'
+            },
+            {
+                text: 'CLOSE',
+                class: 'control-button secondary',
+                onclick: 'closeModal()'
+            }
+        ]
+    });
+    
+    document.body.appendChild(modal);
+}
+
+function createMilitaryModal({ title, content, buttons }) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
+    modal.id = 'militaryModal';
+    
+    const buttonHtml = buttons.map(btn => 
+        `<button class="${btn.class}" onclick="${btn.onclick}">${btn.text}</button>`
+    ).join('');
+    
+    modal.innerHTML = `
+        <div class="bg-gray-900 border border-primary rounded-lg max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="border-b border-gray-600 p-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-primary">${title}</h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                ${content}
+            </div>
+            <div class="border-t border-gray-600 p-6 flex gap-3 justify-end">
+                ${buttonHtml}
+            </div>
+        </div>
+    `;
+    
+    // Click outside to close
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    return modal;
+}
+
+function submitAccessRequest() {
+    console.log('Access request submitted for {{ module_name }}');
+    closeModal();
+    
+    // Show confirmation
+    setTimeout(() => {
+        const confirmation = createMilitaryModal({
+            title: '✅ REQUEST SUBMITTED',
+            content: `
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-success mb-4">ACCESS REQUEST CONFIRMED</h3>
+                    <p class="text-gray-300 mb-4">
+                        Your priority access request for the <strong class="text-primary">{{ module_name }}</strong> 
+                        tactical module has been submitted successfully.
+                    </p>
+                    <div class="bg-green-500 bg-opacity-10 border border-green-500 rounded-lg p-4">
+                        <p class="text-success text-sm">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            You will be notified via secure communication channels when the module becomes available.
+                        </p>
+                    </div>
+                </div>
+            `,
+            buttons: [
+                {
+                    text: 'UNDERSTOOD',
+                    class: 'control-button',
+                    onclick: 'closeModal()'
+                }
+            ]
+        });
+        document.body.appendChild(confirmation);
+    }, 500);
+}
+
+function subscribeToUpdates(feature) {
+    console.log(`Subscribed to updates for ${feature} feature`);
+    closeModal();
+    
+    // Show subscription confirmation
+    setTimeout(() => {
+        const confirmation = createMilitaryModal({
+            title: '🔔 NOTIFICATION ACTIVATED',
+            content: `
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bell text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-info mb-4">UPDATE NOTIFICATIONS ENABLED</h3>
+                    <p class="text-gray-300">
+                        You will receive secure notifications when the <strong class="text-primary">${feature.toUpperCase()}</strong> 
+                        feature becomes operational.
+                    </p>
+                </div>
+            `,
+            buttons: [
+                {
+                    text: 'ROGER THAT',
+                    class: 'control-button info',
+                    onclick: 'closeModal()'
+                }
+            ]
+        });
+        document.body.appendChild(confirmation);
+    }, 500);
+}
+
+function closeModal() {
+    const modal = document.getElementById('militaryModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Feature preview animation styles
+const style = document.createElement('style');
+style.textContent = `
+    .feature-preview {
+        background: rgba(17, 24, 39, 0.5);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-preview:hover {
+        border-color: rgba(0, 255, 136, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 255, 136, 0.1);
+    }
+    
+    .roadmap-item {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: rgba(17, 24, 39, 0.3);
+    }
+    
+    .roadmap-item.completed {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .roadmap-item.in-progress {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .roadmap-item.pending {
+        background: rgba(107, 114, 128, 0.1);
+        border: 1px solid rgba(107, 114, 128, 0.3);
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

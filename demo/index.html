@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SainyaSecure - Military Communication System Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #000000, #1a1a2e);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff00;
+            box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .header h1 {
+            color: #00ff00;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .status {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid;
+        }
+
+        .online { background: #004400; color: #00ff00; border-color: #00ff00; }
+        .p2p { background: #444400; color: #ffff00; border-color: #ffff00; }
+        .offline { background: #440000; color: #ff0000; border-color: #ff0000; }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 80px);
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .panel h3 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+
+        .nodes-panel {
+            overflow-y: auto;
+        }
+
+        .node {
+            background: linear-gradient(90deg, #001100, #002200);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #00ff00;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            background: linear-gradient(90deg, #002200, #003300);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .node.selected {
+            border-left-color: #ffff00;
+            background: linear-gradient(90deg, #222200, #333300);
+        }
+
+        .node.offline {
+            border-left-color: #ff0000;
+            background: linear-gradient(90deg, #220000, #330000);
+            color: #ff4444;
+        }
+
+        .node-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .node-details {
+            font-size: 11px;
+            color: #aaffaa;
+            margin-top: 5px;
+        }
+
+        .battlefield-map {
+            position: relative;
+            background: #0a0a0a;
+            border-radius: 10px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .node-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #00ff00;
+            background: radial-gradient(circle, #00ff00, #004400);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node-marker:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .node-marker.offline {
+            border-color: #ff0000;
+            background: radial-gradient(circle, #ff0000, #440000);
+            color: #fff;
+        }
+
+        .node-marker.p2p {
+            border-color: #ffff00;
+            background: radial-gradient(circle, #ffff00, #444400);
+            color: #000;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            transform-origin: left center;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .messages-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .message-input input {
+            flex: 1;
+            background: #001100;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+
+        .message-input button {
+            background: #004400;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.3s ease;
+        }
+
+        .message-input button:hover {
+            background: #006600;
+        }
+
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .message {
+            background: #001100;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #00ff00;
+            font-size: 12px;
+        }
+
+        .message.alert {
+            border-left-color: #ff0000;
+            background: #220000;
+            color: #ffaaaa;
+        }
+
+        .message.command {
+            border-left-color: #ffff00;
+            background: #222200;
+            color: #ffffaa;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .message-time {
+            color: #666;
+            font-size: 10px;
+            float: right;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: #002200;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #004400;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .control-btn.danger {
+            border-color: #ff0000;
+            color: #ff0000;
+            background: #220000;
+        }
+
+        .control-btn.danger:hover {
+            background: #440000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .control-btn.warning {
+            border-color: #ffff00;
+            color: #ffff00;
+            background: #222200;
+        }
+
+        .control-btn.warning:hover {
+            background: #444400;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .network-stats {
+            background: #001100;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .blockchain-status {
+            background: #000022;
+            border: 1px solid #0088ff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .blockchain-status h4 {
+            color: #0088ff;
+            margin-bottom: 10px;
+        }
+
+        .block {
+            background: #001122;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            border-left: 2px solid #0088ff;
+        }
+
+        .demo-scenario {
+            background: #222200;
+            border: 1px solid #ffff00;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .demo-scenario h4 {
+            color: #ffff00;
+            margin-bottom: 10px;
+        }
+
+        .scenario-step {
+            margin: 5px 0;
+            font-size: 12px;
+            padding: 5px;
+            background: #111100;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <i class="fas fa-shield-alt"></i>
+            SAINYA SECURE - Battlefield Communication System
+        </h1>
+        <div class="status">
+            <div class="status-indicator online" id="server-status">
+                <i class="fas fa-server"></i> SERVER ONLINE
+            </div>
+            <div class="status-indicator" id="network-mode">
+                <i class="fas fa-wifi"></i> CENTRALIZED
+            </div>
+            <div id="current-time"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel - Network Nodes -->
+        <div class="panel nodes-panel">
+            <h3><i class="fas fa-users"></i> BATTLEFIELD NODES</h3>
+            
+            <div class="network-stats">
+                <div class="stat">
+                    <span>Total Nodes:</span>
+                    <span id="total-nodes">4</span>
+                </div>
+                <div class="stat">
+                    <span>Online:</span>
+                    <span id="online-nodes">4</span>
+                </div>
+                <div class="stat">
+                    <span>P2P Mode:</span>
+                    <span id="p2p-nodes">0</span>
+                </div>
+                <div class="stat">
+                    <span>Total Messages:</span>
+                    <span id="total-messages">0</span>
+                </div>
+            </div>
+
+            <div id="nodes-list">
+                <!-- Nodes will be populated by JavaScript -->
+            </div>
+
+            <div class="controls">
+                <button class="control-btn danger" onclick="simulateServerFailure()">
+                    <i class="fas fa-exclamation-triangle"></i> Server Down
+                </button>
+                <button class="control-btn" onclick="simulateServerRecovery()" id="server-recovery-btn" style="display: none;">
+                    <i class="fas fa-undo"></i> Server Up
+                </button>
+                <button class="control-btn warning" onclick="simulateNodeDropout()">
+                    <i class="fas fa-user-times"></i> Node Dropout
+                </button>
+                <button class="control-btn" onclick="syncAllNodes()">
+                    <i class="fas fa-sync"></i> Force Sync
+                </button>
+            </div>
+
+            <div class="blockchain-status">
+                <h4><i class="fas fa-link"></i> Blockchain Status</h4>
+                <div id="blockchain-blocks">
+                    <!-- Blockchain blocks will be shown here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel - Battlefield Map -->
+        <div class="panel">
+            <h3><i class="fas fa-map"></i> TACTICAL MAP</h3>
+            
+            <div class="demo-scenario">
+                <h4><i class="fas fa-play"></i> Demo Scenarios</h4>
+                <div class="scenario-step" onclick="runScenario('serverFailure')">
+                    1. Central Server Failure → P2P Fallback
+                </div>
+                <div class="scenario-step" onclick="runScenario('nodeDropout')">
+                    2. Node Dropout → Message Queuing
+                </div>
+                <div class="scenario-step" onclick="runScenario('conflictResolution')">
+                    3. Sync Conflicts → Lamport Clock Resolution
+                </div>
+                <div class="scenario-step" onclick="runScenario('fullDemo')">
+                    4. Full Battlefield Simulation
+                </div>
+            </div>
+
+            <div class="battlefield-map" id="battlefield-map">
+                <div class="map-grid"></div>
+                <!-- Node markers and connections will be drawn here -->
+            </div>
+        </div>
+
+        <!-- Right Panel - Messages -->
+        <div class="panel messages-panel">
+            <h3><i class="fas fa-comments"></i> SECURE MESSAGES</h3>
+            
+            <div class="message-input">
+                <select id="message-type">
+                    <option value="chat">CHAT</option>
+                    <option value="command">COMMAND</option>
+                    <option value="alert">ALERT</option>
+                    <option value="status">STATUS</option>
+                </select>
+                <input type="text" id="message-content" placeholder="Enter message..." maxlength="200">
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <div class="messages-list" id="messages-list">
+                <!-- Messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo Data and State
+        let networkState = {
+            serverOnline: true,
+            nodes: [],
+            connections: [],
+            messages: [],
+            selectedNode: 'alpha_1',
+            blockchainBlocks: []
+        };
+
+        // WebSocket Connection
+        let websocket = null;
+        let isConnected = false;
+        
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            try {
+                websocket = new WebSocket('ws://localhost:8765');
+                
+                websocket.onopen = function(event) {
+                    console.log('Connected to battlefield server');
+                    isConnected = true;
+                    showNotification('🟢 Connected to battlefield server', 'success');
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleServerMessage(data);
+                    } catch (e) {
+                        console.error('Error parsing server message:', e);
+                    }
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    showNotification('🔴 Connection error - using offline demo mode', 'danger');
+                    initOfflineDemo();
+                };
+                
+                websocket.onclose = function(event) {
+                    isConnected = false;
+                    console.log('Disconnected from battlefield server');
+                    showNotification('🟡 Disconnected from server - using offline demo mode', 'warning');
+                    initOfflineDemo();
+                };
+                
+            } catch (error) {
+                console.error('Failed to connect to server:', error);
+                initOfflineDemo();
+            }
+        }
+
+        // Handle messages from the server
+        function handleServerMessage(data) {
+            switch (data.type) {
+                case 'network_topology':
+                    updateNetworkTopology(data.data);
+                    break;
+                case 'new_message':
+                    addNewMessage(data.data);
+                    break;
+                case 'system_event':
+                    handleSystemEvent(data.data);
+                    break;
+                default:
+                    console.log('Unknown message type:', data.type);
+            }
+        }
+
+        // Update network topology from server
+        function updateNetworkTopology(topology) {
+            networkState.serverOnline = topology.server_online;
+            networkState.connections = topology.connections || [];
+            
+            // Convert server node format to client format
+            networkState.nodes = [];
+            for (const [nodeId, nodeData] of Object.entries(topology.nodes || {})) {
+                networkState.nodes.push({
+                    id: nodeData.id,
+                    name: nodeData.name,
+                    rank: nodeData.rank,
+                    unit: nodeData.unit,
+                    position: nodeData.position,
+                    online: nodeData.status !== 'offline',
+                    mode: nodeData.status === 'online' ? 'online' : 
+                          nodeData.status === 'p2p_only' ? 'p2p' : 'offline',
+                    lamportClock: nodeData.lamport_clock,
+                    queueSize: nodeData.message_queue_size
+                });
+            }
+            
+            if (networkState.nodes.length > 0 && !networkState.selectedNode) {
+                networkState.selectedNode = networkState.nodes[0].id;
+            }
+            
+            updateDisplay();
+        }
+
+        // Add new message from server
+        function addNewMessage(messageData) {
+            const message = {
+                id: messageData.id,
+                sender: messageData.sender_name,
+                senderId: messageData.sender_id,
+                content: messageData.content,
+                type: messageData.message_type,
+                timestamp: new Date(messageData.timestamp).toLocaleTimeString(),
+                lamportClock: messageData.lamport_clock,
+                routePath: messageData.route_path
+            };
+            
+            networkState.messages.push(message);
+            updateDisplay();
+        }
+
+        // Handle system events from server
+        function handleSystemEvent(eventData) {
+            const severityMap = {
+                'info': 'info',
+                'warning': 'warning', 
+                'critical': 'danger'
+            };
+            
+            showNotification(
+                `🎯 ${eventData.description}`, 
+                severityMap[eventData.severity] || 'info'
+            );
+        }
+
+        // Send message to server
+        function sendToServer(data) {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify(data));
+            } else {
+                console.log('Not connected to server, using offline mode');
+                handleOfflineAction(data);
+            }
+        }
+
+        // Initialize offline demo mode
+        function initOfflineDemo() {
+            networkState = {
+                serverOnline: true,
+                nodes: [
+                    {
+                        id: 'alpha_1',
+                        name: 'Alpha Team Lead',
+                        rank: 'Sergeant',
+                        position: { x: 100, y: 150 },
+                        online: true,
+                        mode: 'online'
+                    },
+                    {
+                        id: 'bravo_1', 
+                        name: 'Bravo Scout',
+                        rank: 'Corporal',
+                        position: { x: 300, y: 200 },
+                        online: true,
+                        mode: 'online'
+                    },
+                    {
+                        id: 'charlie_1',
+                        name: 'Charlie Support', 
+                        rank: 'Private',
+                        position: { x: 200, y: 350 },
+                        online: true,
+                        mode: 'online'
+                    },
+                    {
+                        id: 'delta_1',
+                        name: 'Delta Command',
+                        rank: 'Lieutenant', 
+                        position: { x: 450, y: 180 },
+                        online: true,
+                        mode: 'online'
+                    },
+                    {
+                        id: 'echo_1',
+                        name: 'Echo Medic',
+                        rank: 'Corporal',
+                        position: { x: 350, y: 100 },
+                        online: true,
+                        mode: 'online'
+                    }
+                ],
+                connections: [],
+                messages: [],
+                selectedNode: 'alpha_1',
+                blockchainBlocks: []
+            };
+            updateDisplay();
+        }
+
+        // Handle actions in offline mode
+        function handleOfflineAction(data) {
+            switch (data.type) {
+                case 'simulate_scenario':
+                    // Handle offline simulation
+                    if (data.scenario === 'server_failure') {
+                        simulateServerFailure();
+                    } else if (data.scenario === 'server_recovery') {
+                        simulateServerRecovery();
+                    } else if (data.scenario === 'node_dropout') {
+                        simulateNodeDropout();
+                    }
+                    break;
+                case 'send_message':
+                    // Handle offline message
+                    addOfflineMessage(data);
+                    break;
+            }
+        }
+
+        // Add offline message
+        function addOfflineMessage(data) {
+            const selectedNodeData = networkState.nodes.find(n => n.id === networkState.selectedNode);
+            const message = {
+                id: Date.now(),
+                sender: selectedNodeData ? selectedNodeData.name : 'Unknown',
+                senderId: networkState.selectedNode,
+                content: data.content,
+                type: data.message_type,
+                timestamp: new Date().toLocaleTimeString(),
+                lamportClock: networkState.messages.length + 1
+            };
+            
+            networkState.messages.push(message);
+            addToBlockchain(message);
+            updateDisplay();
+        }
+
+        // Initialize Demo
+        function initDemo() {
+            // Try to connect to server first
+            initWebSocket();
+            
+            updateTime();
+            setInterval(updateTime, 1000);
+            drawBattlefieldMap();
+            
+            // Request initial network status if connected
+            setTimeout(() => {
+                if (isConnected) {
+                    sendToServer({
+                        type: 'get_network_status'
+                    });
+                }
+            }, 500);
+        }
+
+        // Update Time Display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = 
+                now.toTimeString().split(' ')[0];
+        }
+
+        // Update All Display Elements
+        function updateDisplay() {
+            updateServerStatus();
+            updateNetworkStats();
+            updateNodesList();
+            updateMessagesList();
+            updateBlockchainStatus();
+            drawBattlefieldMap();
+        }
+
+        // Update Server Status
+        function updateServerStatus() {
+            const serverStatus = document.getElementById('server-status');
+            const networkMode = document.getElementById('network-mode');
+            const recoveryBtn = document.getElementById('server-recovery-btn');
+
+            if (networkState.serverOnline) {
+                serverStatus.innerHTML = '<i class="fas fa-server"></i> SERVER ONLINE';
+                serverStatus.className = 'status-indicator online';
+                networkMode.innerHTML = '<i class="fas fa-wifi"></i> CENTRALIZED';
+                networkMode.className = 'status-indicator online';
+                recoveryBtn.style.display = 'none';
+            } else {
+                serverStatus.innerHTML = '<i class="fas fa-server"></i> SERVER DOWN';
+                serverStatus.className = 'status-indicator offline';
+                networkMode.innerHTML = '<i class="fas fa-project-diagram"></i> P2P MODE';
+                networkMode.className = 'status-indicator p2p';
+                recoveryBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Update Network Statistics
+        function updateNetworkStats() {
+            const onlineNodes = networkState.nodes.filter(n => n.online).length;
+            const p2pNodes = networkState.nodes.filter(n => n.mode === 'p2p').length;
+
+            document.getElementById('total-nodes').textContent = networkState.nodes.length;
+            document.getElementById('online-nodes').textContent = onlineNodes;
+            document.getElementById('p2p-nodes').textContent = p2pNodes;
+            document.getElementById('total-messages').textContent = networkState.messages.length;
+        }
+
+        // Update Nodes List
+        function updateNodesList() {
+            const nodesList = document.getElementById('nodes-list');
+            nodesList.innerHTML = '';
+
+            networkState.nodes.forEach(node => {
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = `node ${node.online ? '' : 'offline'} ${node.id === networkState.selectedNode ? 'selected' : ''}`;
+                nodeDiv.onclick = () => selectNode(node.id);
+
+                nodeDiv.innerHTML = `
+                    <div class="node-name">
+                        <i class="fas fa-user-shield"></i> ${node.name}
+                    </div>
+                    <div class="node-details">
+                        Rank: ${node.rank}<br>
+                        Status: ${node.online ? 'ONLINE' : 'OFFLINE'}<br>
+                        Mode: ${node.mode.toUpperCase()}
+                    </div>
+                `;
+
+                nodesList.appendChild(nodeDiv);
+            });
+        }
+
+        // Select Node
+        function selectNode(nodeId) {
+            networkState.selectedNode = nodeId;
+            updateDisplay();
+        }
+
+        // Draw Battlefield Map
+        function drawBattlefieldMap() {
+            const map = document.getElementById('battlefield-map');
+            
+            // Clear existing markers and connections
+            const existingMarkers = map.querySelectorAll('.node-marker, .connection-line');
+            existingMarkers.forEach(el => el.remove());
+
+            // Draw node markers
+            networkState.nodes.forEach(node => {
+                const marker = document.createElement('div');
+                marker.className = `node-marker ${node.online ? node.mode : 'offline'}`;
+                marker.style.left = node.position.x + 'px';
+                marker.style.top = node.position.y + 'px';
+                marker.textContent = node.name.split(' ')[0][0]; // First letter
+                marker.title = `${node.name} (${node.rank})`;
+                marker.onclick = () => selectNode(node.id);
+
+                map.appendChild(marker);
+            });
+
+            // Draw connections based on server data or fallback to client logic
+            if (networkState.connections && networkState.connections.length > 0) {
+                // Use server-provided connections
+                networkState.connections.forEach(conn => {
+                    if (conn.from === 'central_server') {
+                        // Central server connection
+                        const node = networkState.nodes.find(n => n.id === conn.to);
+                        if (node) {
+                            const centerX = 300;
+                            const centerY = 250;
+                            drawConnection(node.position.x + 20, node.position.y + 20, centerX, centerY);
+                        }
+                    } else {
+                        // P2P connection
+                        const node1 = networkState.nodes.find(n => n.id === conn.from);
+                        const node2 = networkState.nodes.find(n => n.id === conn.to);
+                        if (node1 && node2) {
+                            drawConnection(
+                                node1.position.x + 20, node1.position.y + 20,
+                                node2.position.x + 20, node2.position.y + 20
+                            );
+                        }
+                    }
+                });
+            } else {
+                // Fallback to client-side connection logic
+                if (networkState.serverOnline) {
+                    // Centralized connections to server (center point)
+                    const centerX = 300;
+                    const centerY = 250;
+
+                    networkState.nodes.forEach(node => {
+                        if (node.online) {
+                            drawConnection(node.position.x + 20, node.position.y + 20, centerX, centerY);
+                        }
+                    });
+                } else {
+                    // P2P mesh connections
+                    for (let i = 0; i < networkState.nodes.length; i++) {
+                        for (let j = i + 1; j < networkState.nodes.length; j++) {
+                            const node1 = networkState.nodes[i];
+                            const node2 = networkState.nodes[j];
+
+                            if (node1.online && node2.online && canConnectP2P(node1, node2)) {
+                                drawConnection(
+                                    node1.position.x + 20, node1.position.y + 20,
+                                    node2.position.x + 20, node2.position.y + 20
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check if two nodes can connect in P2P mode
+        function canConnectP2P(node1, node2) {
+            const distance = Math.sqrt(
+                Math.pow(node2.position.x - node1.position.x, 2) + 
+                Math.pow(node2.position.y - node1.position.y, 2)
+            );
+            return distance < 200; // Maximum P2P range
+        }
+
+        // Draw Connection Line
+        function drawConnection(x1, y1, x2, y2) {
+            const map = document.getElementById('battlefield-map');
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+
+            const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+            line.style.left = x1 + 'px';
+            line.style.top = y1 + 'px';
+            line.style.width = distance + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+
+            map.appendChild(line);
+        }
+
+        // Send Message
+        function sendMessage() {
+            const content = document.getElementById('message-content').value;
+            const type = document.getElementById('message-type').value;
+
+            if (!content.trim()) return;
+
+            const messageData = {
+                type: 'send_message',
+                sender_id: networkState.selectedNode,
+                content: content,
+                message_type: type,
+                recipients: [] // Broadcast to all
+            };
+
+            sendToServer(messageData);
+            document.getElementById('message-content').value = '';
+
+            // Show routing notification
+            if (!networkState.serverOnline) {
+                showNotification('Message sent via P2P network', 'warning');
+            } else {
+                showNotification('Message sent via central server', 'success');
+            }
+        }
+
+        // Add Message to Blockchain
+        function addToBlockchain(message) {
+            const block = {
+                blockNumber: networkState.blockchainBlocks.length,
+                timestamp: Date.now(),
+                messageHash: 'sha256_' + Math.random().toString(36).substr(2, 16),
+                previousHash: networkState.blockchainBlocks.length > 0 ? 
+                    networkState.blockchainBlocks[networkState.blockchainBlocks.length - 1].hash : '0',
+                hash: 'block_' + Math.random().toString(36).substr(2, 16),
+                message: message
+            };
+
+            networkState.blockchainBlocks.push(block);
+        }
+
+        // Update Messages List
+        function updateMessagesList() {
+            const messagesList = document.getElementById('messages-list');
+            messagesList.innerHTML = '';
+
+            networkState.messages.slice(-20).reverse().forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.type}`;
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <i class="fas fa-user"></i> ${message.sender}
+                        <span class="message-time">${message.timestamp}</span>
+                    </div>
+                    <div>${message.content}</div>
+                    <div style="font-size: 10px; color: #666; margin-top: 5px;">
+                        Lamport Clock: ${message.lamportClock}
+                    </div>
+                `;
+
+                messagesList.appendChild(messageDiv);
+            });
+        }
+
+        // Update Blockchain Status
+        function updateBlockchainStatus() {
+            const blocksDiv = document.getElementById('blockchain-blocks');
+            blocksDiv.innerHTML = '';
+
+            networkState.blockchainBlocks.slice(-5).reverse().forEach(block => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'block';
+                blockDiv.innerHTML = `
+                    Block #${block.blockNumber}<br>
+                    Hash: ${block.hash.substr(0, 12)}...<br>
+                    Messages: 1
+                `;
+                blocksDiv.appendChild(blockDiv);
+            });
+        }
+
+        // Simulation Functions
+        function simulateServerFailure() {
+            sendToServer({
+                type: 'simulate_scenario',
+                scenario: 'server_failure'
+            });
+        }
+
+        function simulateServerRecovery() {
+            sendToServer({
+                type: 'simulate_scenario',
+                scenario: 'server_recovery'
+            });
+        }
+
+        function simulateNodeDropout() {
+            sendToServer({
+                type: 'simulate_scenario',
+                scenario: 'node_dropout'
+            });
+        }
+
+        function syncAllNodes() {
+            sendToServer({
+                type: 'force_sync'
+            });
+        }
+
+        // Demo Scenarios
+        function runScenario(scenario) {
+            showNotification(`🎮 Running ${scenario} demo...`, 'info');
+            
+            sendToServer({
+                type: 'simulate_scenario',
+                scenario: scenario
+            });
+        }
+
+        // Show Notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+
+            // Set colors based on type
+            const colors = {
+                success: '#004400',
+                danger: '#440000', 
+                warning: '#444400',
+                info: '#000044'
+            };
+            
+            notification.style.background = colors[type] || colors.info;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // Remove after 4 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 4000);
+        }
+
+        // Initialize demo when page loads
+        document.addEventListener('DOMContentLoaded', initDemo);
+
+        // Handle Enter key in message input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('message-content').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!-- System Status Footer -->
+<div class="battlefield-container p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- System Diagnostics -->
+        <div>
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-heartbeat"></i>
+                SYSTEM DIAGNOSTICS
+            </h4>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between p-2 bg-gray-800 bg-opacity-40 rounded">
+                    <span class="text-sm text-gray-300">CPU Usage</span>
+                    <span class="text-sm font-mono text-success">23%</span>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-800 bg-opacity-40 rounded">
+                    <span class="text-sm text-gray-300">Memory</span>
+                    <span class="text-sm font-mono text-warning">67%</span>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-800 bg-opacity-40 rounded">
+                    <span class="text-sm text-gray-300">Network</span>
+                    <span class="text-sm font-mono text-success">98.7%</span>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-800 bg-opacity-40 rounded">
+                    <span class="text-sm text-gray-300">Storage</span>
+                    <span class="text-sm font-mono text-info">45%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Missions -->
+        <div>
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-crosshairs"></i>
+                ACTIVE MISSIONS
+            </h4>
+            <div class="space-y-2">
+                <div class="p-2 bg-gray-800 bg-opacity-40 rounded border-l-2 border-success">
+                    <div class="text-sm font-semibold text-success">Operation Phoenix</div>
+                    <div class="text-xs text-gray-400">Status: In Progress • ETA: 2h 15m</div>
+                </div>
+                <div class="p-2 bg-gray-800 bg-opacity-40 rounded border-l-2 border-warning">
+                    <div class="text-sm font-semibold text-warning">Recon Delta-7</div>
+                    <div class="text-xs text-gray-400">Status: Pending • Squad: Bravo</div>
+                </div>
+                <div class="p-2 bg-gray-800 bg-opacity-40 rounded border-l-2 border-info">
+                    <div class="text-sm font-semibold text-info">Supply Run Echo</div>
+                    <div class="text-xs text-gray-400">Status: Scheduled • 08:00 Hours</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Log -->
+        <div>
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-history"></i>
+                ACTIVITY LOG
+            </h4>
+            <div class="space-y-2">
+                <div class="flex items-start gap-2 text-xs">
+                    <span class="text-primary font-mono">15:43</span>
+                    <span class="text-success">Alpha-1 connected to secure channel</span>
+                </div>
+                <div class="flex items-start gap-2 text-xs">
+                    <span class="text-primary font-mono">15:41</span>
+                    <span class="text-warning">P2P mode activated for Echo-1</span>
+                </div>
+                <div class="flex items-start gap-2 text-xs">
+                    <span class="text-primary font-mono">15:38</span>
+                    <span class="text-gray-300">System sync completed successfully</span>
+                </div>
+                <div class="flex items-start gap-2 text-xs">
+                    <span class="text-primary font-mono">15:35</span>
+                    <span class="text-info">{{ rank_title }} logged into dashboard</span>
+                </div>
+                <div class="flex items-start gap-2 text-xs">
+                    <span class="text-primary font-mono">15:32</span>
+                    <span class="text-gray-300">Network topology updated</span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Footer Actions -->
+    <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-600">
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-400">Secure Connection Established</span>
+            <div class="flex items-center gap-2">
+                <div class="status-online"></div>
+                <span class="text-xs font-mono text-success">TLS 1.3 • AES-256</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button class="control-button secondary px-4 py-2 text-sm" onclick="refreshDashboard()">
+                <i class="fas fa-sync"></i>
+                Refresh
+            </button>
+            <button class="control-button px-4 py-2 text-sm" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+                Settings
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced Battlefield Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    initializeBattlefield();
+    updateRealTimeData();
+    
+    // Start real-time updates
+    setInterval(updateRealTimeData, 5000);
+    setInterval(updateTime, 1000);
+});
+
+function initializeBattlefield() {
+    // Add connection line animations
+    const connectionLines = document.querySelectorAll('.connection-line');
+    connectionLines.forEach((line, index) => {
+        setTimeout(() => {
+            line.style.animationDelay = `${index * 0.5}s`;
+        }, 100);
+    });
+    
+    // Add node hover interactions
+    const nodes = document.querySelectorAll('.battlefield-node');
+    nodes.forEach(node => {
+        node.addEventListener('mouseenter', function() {
+            showNodeDetails(this.getAttribute('data-node'));
+        });
+        
+        node.addEventListener('mouseleave', hideNodeDetails);
+    });
+}
+
+function updateRealTimeData() {
+    // Simulate real-time battlefield updates
+    const nodes = document.querySelectorAll('.battlefield-node');
+    const messages = [
+        'All units report status',
+        'Perimeter secure',
+        'Awaiting further orders',
+        'Position confirmed',
+        'Radio check complete'
+    ];
+    
+    // Update battlefield nodes status
+    nodes.forEach(node => {
+        if (Math.random() > 0.7) {
+            node.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.6)';
+            setTimeout(() => {
+                node.style.boxShadow = '0 0 10px rgba(0, 255, 136, 0.3)';
+            }, 1000);
+        }
+    });
+    
+    // Add random message to terminal
+    if (Math.random() > 0.8) {
+        addTerminalMessage(messages[Math.floor(Math.random() * messages.length)]);
+    }
+}
+
+function updateTime() {
+    const timeElements = document.querySelectorAll('.current-time');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+    
+    timeElements.forEach(el => {
+        el.textContent = timeStr;
+    });
+}
+
+function showNodeDetails(nodeId) {
+    // Could implement tooltip or modal with node details
+    console.log(`Showing details for node: ${nodeId}`);
+}
+
+function hideNodeDetails() {
+    // Hide any open node details
+}
+
+function sendSecureMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (message) {
+        addTerminalMessage(message, 'USER');
+        input.value = '';
+        
+        // Simulate response after delay
+        setTimeout(() => {
+            const responses = [
+                'Message received and acknowledged',
+                'Roger that, over',
+                'Understood, standing by',
+                'Copy that, proceeding as ordered'
+            ];
+            addTerminalMessage(responses[Math.floor(Math.random() * responses.length)], 'SYSTEM');
+        }, 1000 + Math.random() * 2000);
+    }
+}
+
+function addTerminalMessage(text, sender = 'SYSTEM') {
+    const terminal = document.querySelector('.message-terminal');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'terminal-message';
+    
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+    
+    let senderClass = 'text-yellow-400';
+    if (sender === 'USER') senderClass = 'text-primary';
+    else if (sender === 'ALERT') senderClass = 'text-red-400';
+    
+    messageDiv.innerHTML = `
+        <span class="text-primary">[${timeStr}]</span>
+        <span class="${senderClass}">${sender}:</span>
+        ${text}
+    `;
+    
+    terminal.appendChild(messageDiv);
+    terminal.scrollTop = terminal.scrollHeight;
+    
+    // Remove old messages if too many
+    const messages = terminal.querySelectorAll('.terminal-message');
+    if (messages.length > 10) {
+        messages[0].remove();
+    }
+}
+
+// Command Functions
+function simulateServerFailure() {
+    addTerminalMessage('⚠️ SERVER FAILURE SIMULATION ACTIVATED', 'ALERT');
+    // Switch nodes to P2P mode animation
+    const nodes = document.querySelectorAll('.battlefield-node:not(.p2p)');
+    nodes.forEach((node, index) => {
+        setTimeout(() => {
+            node.classList.add('p2p');
+            addTerminalMessage(`${node.textContent} switching to P2P mode`, 'SYSTEM');
+        }, index * 500);
+    });
+}
+
+function simulateNodeDropout() {
+    const nodes = document.querySelectorAll('.battlefield-node');
+    const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+    
+    randomNode.style.opacity = '0.3';
+    randomNode.style.transform = 'scale(0.8)';
+    addTerminalMessage(`❌ ${randomNode.textContent} connection lost`, 'ALERT');
+    
+    setTimeout(() => {
+        randomNode.style.opacity = '1';
+        randomNode.style.transform = 'scale(1)';
+        addTerminalMessage(`✅ ${randomNode.textContent} reconnected`, 'SYSTEM');
+    }, 3000);
+}
+
+function syncAllNodes() {
+    addTerminalMessage('🔄 Force sync initiated for all nodes', 'SYSTEM');
+    const nodes = document.querySelectorAll('.battlefield-node');
+    
+    nodes.forEach((node, index) => {
+        setTimeout(() => {
+            node.style.boxShadow = '0 0 20px rgba(0, 255, 136, 0.8)';
+            setTimeout(() => {
+                node.style.boxShadow = '0 0 10px rgba(0, 255, 136, 0.3)';
+            }, 800);
+        }, index * 200);
+    });
+    
+    setTimeout(() => {
+        addTerminalMessage('✅ All nodes synchronized successfully', 'SYSTEM');
+    }, 2000);
+}
+
+function emergencyProtocol() {
+    addTerminalMessage('🚨 EMERGENCY PROTOCOL ACTIVATED', 'ALERT');
+    document.body.style.animation = 'emergency-flash 2s ease-in-out';
+    
+    setTimeout(() => {
+        document.body.style.animation = '';
+    }, 2000);
+}
+
+function commandAction(action) {
+    addTerminalMessage(`Command action: ${action.toUpperCase()}`, 'COMMAND');
+}
+
+function operationAction(action) {
+    addTerminalMessage(`Operation action: ${action.toUpperCase()}`, 'OPERATION');
+}
+
+function intelAction(action) {
+    addTerminalMessage(`Intelligence action: ${action.toUpperCase()}`, 'INTEL');
+}
+
+function commsAction(action) {
+    addTerminalMessage(`Communications action: ${action.toUpperCase()}`, 'COMMS');
+}
+
+function fieldAction(action) {
+    addTerminalMessage(`Field action: ${action.toUpperCase()}`, 'FIELD');
+}
+
+function emergencyAction(action) {
+    addTerminalMessage(`Emergency action: ${action.toUpperCase()}`, 'EMERGENCY');
+}
+
+function accessModule(module) {
+    addTerminalMessage(`Accessing module: ${module.toUpperCase()}`, 'SYSTEM');
+    // Could redirect to specific module pages
+    window.location.href = `/dashboard/${module}/`;
+}
+
+function refreshDashboard() {
+    addTerminalMessage('Dashboard refresh initiated', 'SYSTEM');
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function openSettings() {
+    addTerminalMessage('Opening system settings', 'SYSTEM');
+    // Could open settings modal or redirect
+}
+
+// CSS Animation for emergency protocol
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes emergency-flash {
+        0%, 100% { background-color: transparent; }
+        25%, 75% { background-color: rgba(255, 0, 0, 0.1); }
+        50% { background-color: rgba(255, 0, 0, 0.2); }
+    }
+`;
+document.head.appendChild(style);
+</script>

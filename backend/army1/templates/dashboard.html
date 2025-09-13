@@ -1,0 +1,1537 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ rank_title }} - SainyaSecure Battlefield Command{% endblock %}
+
+{% block page_title %}{{ rank_title }} Command Center{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Battlefield-specific styling */
+    .battlefield-container {
+        background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+        border-radius: 15px;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .tactical-map {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 10px;
+        position: relative;
+        min-height: 400px;
+        overflow: hidden;
+    }
+
+    .map-grid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: 
+            linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .battlefield-node {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid var(--primary);
+        background: radial-gradient(circle, var(--primary), #004400);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #000;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+    }
+
+    .battlefield-node:hover {
+        transform: scale(1.15);
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+    }
+
+    .battlefield-node.offline {
+        border-color: #ff0000;
+        background: radial-gradient(circle, #ff0000, #440000);
+        color: #fff;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+    }
+
+    .battlefield-node.p2p {
+        border-color: #ffff00;
+        background: radial-gradient(circle, #ffff00, #444400);
+        color: #000;
+        box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+    }
+
+    .connection-line {
+        position: absolute;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        transform-origin: left center;
+        pointer-events: none;
+        animation: pulse-connection 2s infinite;
+    }
+
+    @keyframes pulse-connection {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+
+    .stats-battlefield {
+        background: rgba(26, 31, 46, 0.8);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 10px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .message-terminal {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 13px;
+        color: var(--primary);
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .terminal-message {
+        margin: 8px 0;
+        padding: 8px;
+        border-left: 3px solid var(--primary);
+        background: rgba(0, 255, 136, 0.05);
+        border-radius: 0 5px 5px 0;
+        animation: message-appear 0.5s ease-in;
+    }
+
+    .terminal-message.alert {
+        border-left-color: #ff0000;
+        color: #ffaaaa;
+        background: rgba(255, 0, 0, 0.05);
+    }
+
+    .terminal-message.command {
+        border-left-color: #ffff00;
+        color: #ffffaa;
+        background: rgba(255, 255, 0, 0.05);
+    }
+
+    @keyframes message-appear {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .military-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .control-button {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: var(--dark);
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        padding: 15px 20px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .control-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+    }
+
+    .control-button.danger {
+        background: linear-gradient(135deg, var(--danger), #cc1a4d);
+        color: white;
+    }
+
+    .control-button.warning {
+        background: linear-gradient(135deg, var(--warning), #cc8800);
+        color: var(--dark);
+    }
+
+    .control-button.secondary {
+        background: linear-gradient(135deg, var(--secondary), #0052cc);
+        color: white;
+    }
+
+    .network-topology {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(26, 31, 46, 0.6));
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 10px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .topology-node {
+        background: rgba(0, 255, 136, 0.1);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        transition: all 0.3s ease;
+    }
+
+    .topology-node:hover {
+        background: rgba(0, 255, 136, 0.2);
+        border-color: var(--primary);
+        transform: translateX(5px);
+    }
+
+    .blockchain-monitor {
+        background: rgba(0, 0, 50, 0.8);
+        border: 1px solid rgba(0, 136, 255, 0.3);
+        border-radius: 10px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .blockchain-block {
+        background: rgba(0, 136, 255, 0.1);
+        border-left: 3px solid #0088ff;
+        border-radius: 0 5px 5px 0;
+        padding: 10px;
+        margin: 8px 0;
+        font-family: monospace;
+        font-size: 11px;
+        animation: block-appear 0.5s ease-in;
+    }
+
+    @keyframes block-appear {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="flex items-center gap-2 text-sm">
+    <i class="fas fa-home text-primary"></i>
+    <span class="text-gray-400">/</span>
+    <span class="text-primary">{{ rank_title }}</span>
+    <span class="text-gray-400">/</span>
+    <span class="text-white">Battlefield Command</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Rank Status Banner with Battlefield Theme -->
+<div class="battlefield-container p-6 mb-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-{% if dashboard_type == 'COMMAND' %}crown{% elif dashboard_type == 'INTELLIGENCE' %}eye{% elif dashboard_type == 'OPERATIONS' %}cogs{% elif dashboard_type == 'COMMUNICATIONS' %}satellite-dish{% elif dashboard_type == 'EMERGENCY' %}exclamation-triangle{% else %}user-shield{% endif %} text-2xl text-white"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-primary">{{ rank_title }} ACCESS LEVEL</h2>
+                <p class="text-gray-300">{% if dashboard_type == 'EMERGENCY' %}🚨 EMERGENCY PROTOCOLS ACTIVE{% elif dashboard_type == 'COMMAND' %}👑 Full system access enabled{% else %}🔒 Authorized access to rank-specific modules{% endif %}</p>
+                <div class="flex items-center gap-4 mt-2">
+                    <span class="text-xs bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-full">{{ dashboard_type }}</span>
+                    <span class="text-xs text-gray-400">Last sync: {{ current_time|date:"H:i:s" }}</span>
+                    <span class="text-xs bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full">
+                        <i class="fas fa-user mr-1"></i>{{ user.username }}
+                    </span>
+                    {% if user.military_id %}
+                    <span class="text-xs bg-yellow-500 bg-opacity-20 text-yellow-300 px-3 py-1 rounded-full">
+                        <i class="fas fa-id-badge mr-1"></i>{{ user.military_id }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- Test User Quick Switch (for development/testing) -->
+            <div class="text-right mr-4">
+                <div class="text-xs text-gray-400 mb-1">Quick Test Login:</div>
+                <div class="flex gap-2">
+                    <button onclick="quickLogin('testcmd')" class="text-xs bg-red-600 bg-opacity-20 text-red-300 px-2 py-1 rounded hover:bg-opacity-40">
+                        CMD
+                    </button>
+                    <button onclick="quickLogin('testops')" class="text-xs bg-blue-600 bg-opacity-20 text-blue-300 px-2 py-1 rounded hover:bg-opacity-40">
+                        OPS
+                    </button>
+                    <button onclick="quickLogin('testintel')" class="text-xs bg-purple-600 bg-opacity-20 text-purple-300 px-2 py-1 rounded hover:bg-opacity-40">
+                        INT
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'logout' %}" class="text-xs bg-gray-600 bg-opacity-20 text-gray-300 px-2 py-1 rounded hover:bg-opacity-40">
+                        <i class="fas fa-sign-out-alt mr-1"></i>LOGOUT
+                    </a>
+                </div>
+            </div>
+            
+            <div class="status-online"></div>
+            <span class="text-sm text-success font-mono">SECURE CONNECTION</span>
+        </div>
+    </div>
+</div>
+
+<!-- System Modules Navigation - Prominent Top Section -->
+<div class="battlefield-container p-6 mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-primary flex items-center gap-3">
+            <i class="fas fa-th-large text-primary"></i>
+            SYSTEM MODULES - QUICK ACCESS
+        </h3>
+        <div class="flex items-center gap-2 text-xs">
+            <span class="bg-success bg-opacity-20 text-success px-2 py-1 rounded">19+ MODULES</span>
+            <span class="text-gray-400">Click any module to access</span>
+        </div>
+    </div>
+    
+    <!-- Core Military Operations -->
+    <div class="mb-6">
+        <h4 class="text-sm font-bold text-blue-400 mb-3 flex items-center gap-2">
+            <i class="fas fa-shield-alt"></i>CORE MILITARY OPERATIONS
+        </h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('personnel')">
+                <i class="fas fa-users text-lg mb-1"></i><br>PERSONNEL
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('messaging')">
+                <i class="fas fa-envelope text-lg mb-1"></i><br>MESSAGING
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('missions')">
+                <i class="fas fa-crosshairs text-lg mb-1"></i><br>MISSIONS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('devices')">
+                <i class="fas fa-mobile-alt text-lg mb-1"></i><br>DEVICES
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('security')">
+                <i class="fas fa-shield-alt text-lg mb-1"></i><br>SECURITY
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('intel')">
+                <i class="fas fa-eye text-lg mb-1"></i><br>INTEL
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('threats')">
+                <i class="fas fa-exclamation-triangle text-lg mb-1"></i><br>THREATS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-primary hover:bg-opacity-20" onclick="accessModule('classified')">
+                <i class="fas fa-lock text-lg mb-1"></i><br>CLASSIFIED
+            </button>
+        </div>
+    </div>
+    
+    <!-- Communications & Networks -->
+    <div class="mb-6">
+        <h4 class="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+            <i class="fas fa-satellite-dish"></i>COMMUNICATIONS & NETWORKS
+        </h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('p2p')">
+                <i class="fas fa-network-wired text-lg mb-1"></i><br>P2P COMM
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('comms')">
+                <i class="fas fa-broadcast-tower text-lg mb-1"></i><br>COMMS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('networks')">
+                <i class="fas fa-sitemap text-lg mb-1"></i><br>NETWORKS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('broadcast')">
+                <i class="fas fa-bullhorn text-lg mb-1"></i><br>BROADCAST
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('operations')">
+                <i class="fas fa-cogs text-lg mb-1"></i><br>OPERATIONS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('tactical')">
+                <i class="fas fa-chess text-lg mb-1"></i><br>TACTICAL
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('reports')">
+                <i class="fas fa-chart-bar text-lg mb-1"></i><br>REPORTS
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-cyan-500 hover:bg-opacity-20" onclick="accessModule('logs')">
+                <i class="fas fa-file-alt text-lg mb-1"></i><br>LOGS
+            </button>
+        </div>
+    </div>
+    
+    <!-- Support & Emergency -->
+    <div>
+        <h4 class="text-sm font-bold text-orange-400 mb-3 flex items-center gap-2">
+            <i class="fas fa-tools"></i>SUPPORT & EMERGENCY
+        </h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
+            <button class="control-button secondary text-xs py-3 hover:bg-orange-500 hover:bg-opacity-20" onclick="accessModule('equipment')">
+                <i class="fas fa-wrench text-lg mb-1"></i><br>EQUIPMENT
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-orange-500 hover:bg-opacity-20" onclick="accessModule('training')">
+                <i class="fas fa-graduation-cap text-lg mb-1"></i><br>TRAINING
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-orange-500 hover:bg-opacity-20" onclick="accessModule('emergency')">
+                <i class="fas fa-ambulance text-lg mb-1"></i><br>EMERGENCY
+            </button>
+            <button class="control-button secondary text-xs py-3 hover:bg-orange-500 hover:bg-opacity-20" onclick="accessModule('help')">
+                <i class="fas fa-question-circle text-lg mb-1"></i><br>HELP
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Battlefield Command Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+    
+    <!-- Left Panel: Tactical Map -->
+    <div class="xl:col-span-2">
+        <div class="battlefield-container p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-3">
+                    <i class="fas fa-map text-primary"></i>
+                    TACTICAL BATTLEFIELD MAP
+                </h3>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-success bg-opacity-20 text-success px-2 py-1 rounded">REAL-TIME</span>
+                    <div class="status-online"></div>
+                </div>
+            </div>
+            
+            <div class="tactical-map">
+                <div class="map-grid"></div>
+                
+                <!-- Dynamic Battlefield Nodes -->
+                <div class="battlefield-node" style="left: 80px; top: 120px;" data-node="alpha" title="Alpha Team Lead - Sergeant">
+                    A1
+                </div>
+                <div class="battlefield-node" style="left: 280px; top: 180px;" data-node="bravo" title="Bravo Scout - Corporal">
+                    B1
+                </div>
+                <div class="battlefield-node" style="left: 180px; top: 320px;" data-node="charlie" title="Charlie Support - Private">
+                    C1
+                </div>
+                <div class="battlefield-node" style="left: 420px; top: 150px;" data-node="delta" title="Delta Command - Lieutenant">
+                    D1
+                </div>
+                <div class="battlefield-node p2p" style="left: 320px; top: 80px;" data-node="echo" title="Echo Medic - Corporal (P2P Mode)">
+                    E1
+                </div>
+                
+                <!-- Connection Lines (will be drawn dynamically) -->
+                <div class="connection-line" style="left: 105px; top: 145px; width: 200px; transform: rotate(15deg);"></div>
+                <div class="connection-line" style="left: 305px; top: 195px; width: 180px; transform: rotate(-20deg);"></div>
+                <div class="connection-line" style="left: 205px; top: 335px; width: 250px; transform: rotate(-35deg);"></div>
+            </div>
+            
+            <!-- Battlefield Controls -->
+            <div class="military-controls">
+                <button class="control-button" onclick="simulateServerFailure()">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Server Down
+                </button>
+                <button class="control-button secondary" onclick="simulateNodeDropout()">
+                    <i class="fas fa-user-times"></i>
+                    Node Dropout  
+                </button>
+                <button class="control-button warning" onclick="syncAllNodes()">
+                    <i class="fas fa-sync"></i>
+                    Force Sync
+                </button>
+                <button class="control-button danger" onclick="emergencyProtocol()">
+                    <i class="fas fa-bullhorn"></i>
+                    Emergency Alert
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Panel: Network Status & Controls -->
+    <div class="xl:col-span-1 space-y-6">
+        
+        <!-- Network Topology -->
+        <div class="network-topology">
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-project-diagram"></i>
+                NETWORK TOPOLOGY
+            </h4>
+            
+            <div class="space-y-3">
+                <div class="topology-node">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Alpha Team Lead</p>
+                            <p class="text-xs text-gray-400">Sergeant • Online • Centralized</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-user-shield text-primary"></i>
+                </div>
+                
+                <div class="topology-node">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Bravo Scout</p>
+                            <p class="text-xs text-gray-400">Corporal • Online • Centralized</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-binoculars text-primary"></i>
+                </div>
+                
+                <div class="topology-node">
+                    <div class="flex items-center gap-3">
+                        <div class="status-warning"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Echo Medic</p>
+                            <p class="text-xs text-yellow-400">Corporal • P2P Mode • Radio Link</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-medkit text-warning"></i>
+                </div>
+                
+                <div class="topology-node">
+                    <div class="flex items-center gap-3">
+                        <div class="status-online"></div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Delta Command</p>
+                            <p class="text-xs text-gray-400">Lieutenant • Online • Centralized</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-satellite text-primary"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Live Statistics -->
+        <div class="stats-battlefield">
+            <h4 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-line"></i>
+                BATTLEFIELD STATS
+            </h4>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-3 bg-gray-800 bg-opacity-50 rounded-lg">
+                    <div class="text-2xl font-bold text-primary">{{ stats.total_personnel|default:5 }}</div>
+                    <div class="text-xs text-gray-400">ACTIVE NODES</div>
+                </div>
+                <div class="text-center p-3 bg-gray-800 bg-opacity-50 rounded-lg">
+                    <div class="text-2xl font-bold text-success">{{ stats.messages_today|default:247 }}</div>
+                    <div class="text-xs text-gray-400">MESSAGES</div>
+                </div>
+                <div class="text-center p-3 bg-gray-800 bg-opacity-50 rounded-lg">
+                    <div class="text-2xl font-bold text-warning">{{ stats.security_alerts|default:0 }}</div>
+                    <div class="text-xs text-gray-400">ALERTS</div>
+                </div>
+                <div class="text-center p-3 bg-gray-800 bg-opacity-50 rounded-lg">
+                    <div class="text-2xl font-bold text-info">99.8%</div>
+                    <div class="text-xs text-gray-400">UPTIME</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Blockchain Monitor -->
+        <div class="blockchain-monitor">
+            <h4 class="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-link"></i>
+                BLOCKCHAIN LEDGER
+            </h4>
+            
+            <div class="space-y-2">
+                <div class="blockchain-block">
+                    <div class="text-xs">Block #847293</div>
+                    <div class="text-xs text-blue-300">Hash: 0x4f2a9b8...d7e3c1</div>
+                    <div class="text-xs text-gray-400">Messages: 3 • Size: 1.2KB</div>
+                </div>
+                
+                <div class="blockchain-block">
+                    <div class="text-xs">Block #847292</div>
+                    <div class="text-xs text-blue-300">Hash: 0x3e1c8a7...b6f4d2</div>
+                    <div class="text-xs text-gray-400">Messages: 5 • Size: 2.1KB</div>
+                </div>
+                
+                <div class="blockchain-block">
+                    <div class="text-xs">Block #847291</div>
+                    <div class="text-xs text-blue-300">Hash: 0x2d0b9c6...a5e8f3</div>
+                    <div class="text-xs text-gray-400">Messages: 2 • Size: 0.8KB</div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Communication Terminal & Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    
+    <!-- Secure Messaging Terminal -->
+    <div class="battlefield-container p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                <i class="fas fa-terminal"></i>
+                SECURE COMMUNICATION TERMINAL
+            </h3>
+            <div class="flex items-center gap-2">
+                <div class="status-online"></div>
+                <span class="text-xs text-success">ENCRYPTED</span>
+            </div>
+        </div>
+        
+        <!-- Message Input -->
+        <div class="flex gap-2 mb-4">
+            <select class="bg-gray-800 border border-primary rounded px-3 py-2 text-primary font-mono text-sm">
+                <option value="chat">CHAT</option>
+                <option value="command">COMMAND</option>
+                <option value="alert">ALERT</option>
+                <option value="status">STATUS</option>
+            </select>
+            <input type="text" placeholder="Enter secure message..." 
+                   class="flex-1 bg-gray-800 border border-primary rounded px-3 py-2 text-primary font-mono text-sm"
+                   id="messageInput" maxlength="200">
+            <button onclick="sendSecureMessage()" class="control-button px-4 py-2 text-sm">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        
+        <!-- Message Terminal -->
+        <div class="message-terminal">
+            <div class="terminal-message">
+                <span class="text-primary">[15:43:27]</span> 
+                <span class="text-yellow-400">SYSTEM:</span> 
+                Secure communication channel established
+            </div>
+            <div class="terminal-message">
+                <span class="text-primary">[15:42:15]</span>
+                <span class="text-success">ALPHA-1:</span>
+                Position report: All clear, sector 7
+            </div>
+            <div class="terminal-message alert">
+                <span class="text-primary">[15:41:03]</span>
+                <span class="text-red-400">BRAVO-1:</span>
+                Contact lost with Charlie-1, investigating
+            </div>
+            <div class="terminal-message command">
+                <span class="text-primary">[15:40:22]</span>
+                <span class="text-yellow-400">DELTA-1:</span>
+                All units maintain radio silence during sweep
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rank-Specific Quick Actions -->
+    <div class="battlefield-container p-6">
+        <h3 class="text-lg font-bold text-primary mb-6 flex items-center gap-2">
+            <i class="fas fa-bolt"></i>
+            COMMAND OPERATIONS - {{ rank_title }}
+        </h3>
+        
+        <div class="space-y-4">
+            {% if dashboard_type == 'COMMAND' %}
+            <button class="control-button w-full" onclick="commandAction('broadcast')">
+                <i class="fas fa-satellite-dish"></i>
+                BROADCAST COMMAND ORDER
+            </button>
+            <button class="control-button secondary w-full" onclick="commandAction('deploy')">
+                <i class="fas fa-chess"></i>
+                DEPLOY TACTICAL FORCES
+            </button>
+            <button class="control-button warning w-full" onclick="commandAction('intel')">
+                <i class="fas fa-eye"></i>
+                REQUEST INTELLIGENCE REPORT
+            </button>
+            {% elif dashboard_type == 'OPERATIONS' %}
+            <button class="control-button w-full" onclick="operationAction('mission')">
+                <i class="fas fa-crosshairs"></i>
+                MISSION CONTROL CENTER
+            </button>
+            <button class="control-button secondary w-full" onclick="operationAction('status')">
+                <i class="fas fa-clipboard-list"></i>
+                OPERATIONAL STATUS REPORT
+            </button>
+            {% elif dashboard_type == 'INTELLIGENCE' %}
+            <button class="control-button w-full" onclick="intelAction('analyze')">
+                <i class="fas fa-search"></i>
+                THREAT ANALYSIS SYSTEM
+            </button>
+            <button class="control-button secondary w-full" onclick="intelAction('classify')">
+                <i class="fas fa-lock"></i>
+                CLASSIFY INTELLIGENCE
+            </button>
+            {% elif dashboard_type == 'COMMUNICATIONS' %}
+            <button class="control-button w-full" onclick="commsAction('broadcast')">
+                <i class="fas fa-broadcast-tower"></i>
+                EMERGENCY BROADCAST
+            </button>
+            <button class="control-button secondary w-full" onclick="commsAction('network')">
+                <i class="fas fa-network-wired"></i>
+                NETWORK DIAGNOSTICS
+            </button>
+            {% elif dashboard_type == 'FIELD' %}
+            <button class="control-button w-full" onclick="fieldAction('report')">
+                <i class="fas fa-flag"></i>
+                FIELD STATUS REPORT
+            </button>
+            <button class="control-button danger w-full" onclick="fieldAction('emergency')">
+                <i class="fas fa-exclamation-triangle"></i>
+                EMERGENCY ALERT
+            </button>
+            {% elif dashboard_type == 'EMERGENCY' %}
+            <button class="control-button danger w-full" onclick="emergencyAction('alert')">
+                <i class="fas fa-bullhorn"></i>
+                MASS EMERGENCY ALERT
+            </button>
+            <button class="control-button danger w-full" onclick="emergencyAction('override')">
+                <i class="fas fa-satellite"></i>
+                COMMUNICATION OVERRIDE
+            </button>
+            {% endif %}
+            
+            <div class="border-t border-gray-600 pt-4 mt-4">
+                <h4 class="text-sm font-bold text-primary mb-3 text-center">
+                    <i class="fas fa-th-large mr-2"></i>SYSTEM MODULES
+                </h4>
+                
+                <!-- Core Military Operations -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('personnel')">
+                        <i class="fas fa-users"></i><br>PERSONNEL
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('messaging')">
+                        <i class="fas fa-envelope"></i><br>MESSAGING
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('missions')">
+                        <i class="fas fa-crosshairs"></i><br>MISSIONS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('devices')">
+                        <i class="fas fa-mobile-alt"></i><br>DEVICES
+                    </button>
+                </div>
+                
+                <!-- Security & Intelligence -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('security')">
+                        <i class="fas fa-shield-alt"></i><br>SECURITY
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('intel')">
+                        <i class="fas fa-eye"></i><br>INTEL
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('threats')">
+                        <i class="fas fa-exclamation-triangle"></i><br>THREATS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('classified')">
+                        <i class="fas fa-lock"></i><br>CLASSIFIED
+                    </button>
+                </div>
+                
+                <!-- Communications & Networks -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('p2p')">
+                        <i class="fas fa-network-wired"></i><br>P2P COMM
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('comms')">
+                        <i class="fas fa-broadcast-tower"></i><br>COMMS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('networks')">
+                        <i class="fas fa-sitemap"></i><br>NETWORKS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('broadcast')">
+                        <i class="fas fa-bullhorn"></i><br>BROADCAST
+                    </button>
+                </div>
+                
+                <!-- Operations & Reports -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('operations')">
+                        <i class="fas fa-cogs"></i><br>OPERATIONS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('tactical')">
+                        <i class="fas fa-chess"></i><br>TACTICAL
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('reports')">
+                        <i class="fas fa-chart-bar"></i><br>REPORTS
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('logs')">
+                        <i class="fas fa-file-alt"></i><br>LOGS
+                    </button>
+                </div>
+                
+                <!-- Support & Emergency -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('equipment')">
+                        <i class="fas fa-wrench"></i><br>EQUIPMENT
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('training')">
+                        <i class="fas fa-graduation-cap"></i><br>TRAINING
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('emergency')">
+                        <i class="fas fa-ambulance"></i><br>EMERGENCY
+                    </button>
+                    <button class="control-button secondary text-xs py-2" onclick="accessModule('help')">
+                        <i class="fas fa-question-circle"></i><br>HELP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'dashboard_footer.html' %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Module access function
+function accessModule(moduleUrl) {
+    // Redirect to the actual module page
+    window.location.href = `/modules/${moduleUrl}/`;
+}
+
+// Rank-specific action functions
+function commandAction(action) {
+    alert(`Command Authority Action: ${action}\n\nThis would execute high-level command operations.`);
+}
+
+function operationAction(action) {
+    alert(`Operations Action: ${action}\n\nThis would manage tactical operations.`);
+}
+
+function intelAction(action) {
+    alert(`Intelligence Action: ${action}\n\nThis would handle intelligence operations.`);
+}
+
+function commsAction(action) {
+    alert(`Communications Action: ${action}\n\nThis would manage communication systems.`);
+}
+
+function fieldAction(action) {
+    alert(`Field Action: ${action}\n\nThis would handle field operations.`);
+}
+
+function emergencyAction(action) {
+    alert(`Emergency Action: ${action}\n\nThis would execute emergency protocols.`);
+}
+
+function commonAction(action) {
+    alert(`Common Action: ${action}\n\nThis is available to all ranks.`);
+}
+
+// Real-time updates
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('{{ rank_title }} Dashboard Loaded');
+    
+    // Update stats every 30 seconds
+    setInterval(function() {
+        fetch('/api/stats/')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Stats updated for {{ dashboard_type }}:', data);
+            })
+            .catch(error => console.error('Error updating stats:', error));
+    }, 30000);
+});
+</script>
+{% endblock %}
+
+<!-- Main Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- System Performance Chart -->
+    <div class="lg:col-span-2">
+        <div class="military-card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-primary"></i>
+                    Communication Traffic Analysis
+                </h3>
+                <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="btn btn-sm btn-ghost">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </label>
+                    <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a>Last 24 Hours</a></li>
+                        <li><a>Last 7 Days</a></li>
+                        <li><a>Last 30 Days</a></li>
+                        <li><a>Export Data</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Performance Metrics Bar -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-success">99.8%</div>
+                    <div class="text-xs text-gray-400">Network Uptime</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-info">2.3ms</div>
+                    <div class="text-xs text-gray-400">Avg Response</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-warning">847GB</div>
+                    <div class="text-xs text-gray-400">Data Processed</div>
+                </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div class="bg-gray-900 rounded-lg p-4" style="height: 300px;">
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Activity Feed -->
+    <div class="lg:col-span-1">
+        <div class="military-card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-activity mr-3 text-secondary"></i>
+                    Live Activity Feed
+                </h3>
+                <div class="loading-pulse">
+                    <span class="status-online"></span>
+                </div>
+            </div>
+            
+            <div class="space-y-4 max-h-96 overflow-y-auto">
+                <div class="activity-item">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-success bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-plus text-success text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm">Personnel Registration</p>
+                            <p class="text-xs text-gray-400">Lt. Sarah Connor - TOP SECRET clearance</p>
+                            <p class="text-xs text-gray-500">2 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-info bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-mobile-alt text-info text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm">Device Connected</p>
+                            <p class="text-xs text-gray-400">Secure Mobile Unit SMU-2847</p>
+                            <p class="text-xs text-gray-500">8 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-warning bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-brain text-warning text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm">AI Security Scan</p>
+                            <p class="text-xs text-gray-400">Anomaly detection completed - All clear</p>
+                            <p class="text-xs text-gray-500">15 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-primary bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-link text-primary text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm">Blockchain Sync</p>
+                            <p class="text-xs text-gray-400">P2P ledger updated - 2,847 transactions</p>
+                            <p class="text-xs text-gray-500">32 minutes ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-error bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-shield-alt text-error text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm">Security Breach Blocked</p>
+                            <p class="text-xs text-gray-400">Unauthorized access attempt from IP 192.168.1.100</p>
+                            <p class="text-xs text-gray-500">1 hour ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button class="btn btn-outline btn-sm w-full">
+                    <i class="fas fa-history mr-2"></i>
+                    View Full Log
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="military-card p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-bold text-lg">Network Status</h4>
+                <p class="text-2xl font-bold text-success">SECURE</p>
+                <p class="text-xs text-gray-400">All nodes operational</p>
+            </div>
+            <div class="status-online"></div>
+        </div>
+    </div>
+
+    <div class="military-card p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-bold text-lg">Encryption Level</h4>
+                <p class="text-2xl font-bold text-primary">AES-256</p>
+                <p class="text-xs text-gray-400">Military grade active</p>
+            </div>
+            <i class="fas fa-lock text-2xl text-primary"></i>
+        </div>
+    </div>
+
+    <div class="military-card p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-bold text-lg">Threat Level</h4>
+                <p class="text-2xl font-bold text-warning">LOW</p>
+                <p class="text-xs text-gray-400">3 alerts in queue</p>
+            </div>
+            <i class="fas fa-exclamation-triangle text-2xl text-warning"></i>
+        </div>
+    </div>
+
+    <div class="military-card p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-bold text-lg">AI Monitoring</h4>
+                <p class="text-2xl font-bold text-info">ACTIVE</p>
+                <p class="text-xs text-gray-400">Real-time analysis</p>
+            </div>
+            <i class="fas fa-brain text-2xl text-info"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Panel -->
+<div class="military-card p-6">
+    <h3 class="text-xl font-bold mb-6 flex items-center">
+        <i class="fas fa-bolt mr-3 text-warning"></i>
+        Command Center Operations
+    </h3>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <button class="btn btn-military">
+            <i class="fas fa-satellite-dish mr-2"></i>
+            Broadcast Alert
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="fas fa-users mr-2"></i>
+            Personnel Mgmt
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="fas fa-mobile-alt mr-2"></i>
+            Device Registry
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="fas fa-shield-alt mr-2"></i>
+            Security Audit
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="fas fa-cogs mr-2"></i>
+            System Config
+        </button>
+        
+        <button class="btn btn-danger">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Emergency Protocol
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize the traffic chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('trafficChart').getContext('2d');
+    
+    const trafficChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+            datasets: [
+                {
+                    label: 'Message Traffic',
+                    data: [1200, 1900, 3000, 5000, 4200, 3100, 2400],
+                    borderColor: 'var(--primary)',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Device Connections',
+                    data: [800, 1200, 1800, 2200, 2000, 1700, 1400],
+                    borderColor: 'var(--secondary)',
+                    backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'var(--text)'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'var(--text-muted)'
+                    },
+                    grid: {
+                        color: 'var(--border)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: 'var(--text-muted)'
+                    },
+                    grid: {
+                        color: 'var(--border)'
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    radius: 4,
+                    hoverRadius: 6
+                }
+            }
+        }
+    });
+
+    // Simulate real-time updates
+    setInterval(function() {
+        // Update chart data with random values
+        trafficChart.data.datasets[0].data = trafficChart.data.datasets[0].data.map(() => 
+            Math.floor(Math.random() * 5000) + 1000
+        );
+        trafficChart.data.datasets[1].data = trafficChart.data.datasets[1].data.map(() => 
+            Math.floor(Math.random() * 2500) + 500
+        );
+        trafficChart.update('none');
+    }, 5000);
+});
+
+// Real-time activity feed simulation
+function addActivityItem(icon, type, title, description, timeAgo, colorClass) {
+    const activityFeed = document.querySelector('.space-y-4');
+    const newItem = document.createElement('div');
+    newItem.className = 'activity-item';
+    newItem.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-${colorClass} bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-${icon} text-${colorClass} text-sm"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="font-medium text-sm">${type}</p>
+                <p class="text-xs text-gray-400">${title}</p>
+                <p class="text-xs text-gray-500">${timeAgo}</p>
+            </div>
+        </div>
+    `;
+    
+    activityFeed.insertBefore(newItem, activityFeed.firstChild);
+    
+    // Remove oldest item to maintain list length
+    if (activityFeed.children.length > 6) {
+        activityFeed.removeChild(activityFeed.lastChild);
+    }
+    
+    // Add entrance animation
+    newItem.style.opacity = '0';
+    newItem.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        newItem.style.transition = 'all 0.3s ease';
+        newItem.style.opacity = '1';
+        newItem.style.transform = 'translateY(0)';
+    }, 100);
+}
+
+// Simulate new activities
+const activities = [
+    {icon: 'sync', type: 'Blockchain Update', title: 'New block added to chain', colorClass: 'primary'},
+    {icon: 'user-shield', type: 'Security Check', title: 'Biometric verification completed', colorClass: 'success'},
+    {icon: 'satellite', type: 'Communication', title: 'Encrypted message transmitted', colorClass: 'info'},
+    {icon: 'microchip', type: 'System Update', title: 'AI model parameters optimized', colorClass: 'warning'}
+];
+
+setInterval(() => {
+    const activity = activities[Math.floor(Math.random() * activities.length)];
+    addActivityItem(
+        activity.icon,
+        activity.type,
+        activity.title,
+        'Just now',
+        activity.colorClass
+    );
+}, 15000); // Add new activity every 15 seconds
+
+// Quick login function for testing different users
+function quickLogin(username) {
+    // Create a form to submit login
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/login/';
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
+    
+    // Add form fields
+    const fields = {
+        'username': username,
+        'password': 'testpass123',
+        'selected_rank': username === 'testcmd' ? 'COMMAND' : (username === 'testops' ? 'OPERATIONS' : 'INTELLIGENCE')
+    };
+    
+    for (const [name, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}
+
+    <!-- Main Dashboard Content -->
+    <div class="max-container py-8">
+        <!-- Quick Stats Row -->
+        <div class="stats-grid gap-4 mb-8">
+            <div class="stat bg-slate-800/40 border border-slate-700 rounded-lg p-4 hover:border-emerald-500/50 transition-all duration-300">
+                <div class="stat-figure text-emerald-400">
+                    <svg class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div class="stat-title text-slate-400">Active Units</div>
+                <div class="stat-value text-emerald-400">2,847</div>
+                <div class="stat-desc text-slate-500">↗︎ 400 (22%)</div>
+            </div>
+            
+            <div class="stat bg-slate-800/40 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 transition-all duration-300">
+                <div class="stat-figure text-blue-400">
+                    <svg class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <div class="stat-title text-slate-400">Security Score</div>
+                <div class="stat-value text-blue-400">98.5%</div>
+                <div class="stat-desc text-slate-500">All systems secure</div>
+            </div>
+            
+            <div class="stat bg-slate-800/40 border border-slate-700 rounded-lg p-4 hover:border-purple-500/50 transition-all duration-300">
+                <div class="stat-figure text-purple-400">
+                    <svg class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                </div>
+                <div class="stat-title text-slate-400">Messages Today</div>
+                <div class="stat-value text-purple-400">1.2M</div>
+                <div class="stat-desc text-slate-500">↗︎ 90 (14%)</div>
+            </div>
+            
+            <div class="stat bg-slate-800/40 border border-slate-700 rounded-lg p-4 hover:border-orange-500/50 transition-all duration-300">
+                <div class="stat-figure text-orange-400">
+                    <svg class="inline-block w-8 h-8 stroke-current" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div class="stat-title text-slate-400">Response Time</div>
+                <div class="stat-value text-orange-400">0.3s</div>
+                <div class="stat-desc text-slate-500">↘︎ 0.1s (25%)</div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid gap-6">
+            <!-- Device Management Panel -->
+            <div class="dashboard-card card bg-slate-800/40 border border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            Device Management
+                        </h2>
+                        <div class="badge badge-success badge-sm">156 Active</div>
+                    </div>
+                    
+                    <!-- Device Status List -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                                <div>
+                                    <p class="text-white text-sm font-medium">Field Unit Alpha-7</p>
+                                    <p class="text-slate-400 text-xs">Last seen: 2 min ago</p>
+                                </div>
+                            </div>
+                            <div class="badge badge-outline badge-xs text-emerald-400">ONLINE</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                <div>
+                                    <p class="text-white text-sm font-medium">Command Post Bravo-3</p>
+                                    <p class="text-slate-400 text-xs">Pending approval</p>
+                                </div>
+                            </div>
+                            <div class="badge badge-outline badge-xs text-yellow-400">PENDING</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <div>
+                                    <p class="text-white text-sm font-medium">Mobile Unit Charlie-1</p>
+                                    <p class="text-slate-400 text-xs">Sync in progress</p>
+                                </div>
+                            </div>
+                            <div class="badge badge-outline badge-xs text-blue-400">SYNCING</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions justify-end mt-4">
+                        <a href="{% url 'join' %}" class="btn btn-primary btn-sm bg-emerald-600 hover:bg-emerald-700 border-emerald-600">Manage Devices</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Monitoring -->
+            <div class="dashboard-card card bg-slate-800/40 border border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            AI Security Monitor
+                        </h2>
+                        <div class="badge badge-info badge-sm">AI Active</div>
+                    </div>
+                    
+                    <!-- Security Alerts -->
+                    <div class="space-y-3">
+                        <div class="alert alert-success bg-emerald-900/30 border-emerald-600/50 text-emerald-200 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>All systems operating normally</span>
+                        </div>
+                        
+                        <div class="alert alert-warning bg-amber-900/30 border-amber-600/50 text-amber-200 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            <span>3 devices require security updates</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Metrics -->
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="text-center p-3 bg-slate-700/30 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-400">0</div>
+                            <div class="text-xs text-slate-400">Threats Blocked</div>
+                        </div>
+                        <div class="text-center p-3 bg-slate-700/30 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-400">99.8%</div>
+                            <div class="text-xs text-slate-400">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communications Hub -->
+            <div class="dashboard-card card bg-slate-800/40 border border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Communications
+                        </h2>
+                        <div class="badge badge-accent badge-sm">LIVE</div>
+                    </div>
+                    
+                    <!-- Recent Messages -->
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        <div class="flex items-start gap-3 p-2 hover:bg-slate-700/30 rounded">
+                            <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white text-xs font-bold">A7</div>
+                            <div class="flex-1">
+                                <p class="text-white text-sm">Position report: All clear, sector 7</p>
+                                <p class="text-slate-400 text-xs">Alpha-7 • 2 min ago</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start gap-3 p-2 hover:bg-slate-700/30 rounded">
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">CC</div>
+                            <div class="flex-1">
+                                <p class="text-white text-sm">Weather update: Storm approaching from northeast</p>
+                                <p class="text-slate-400 text-xs">Command Center • 5 min ago</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start gap-3 p-2 hover:bg-slate-700/30 rounded">
+                            <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">B3</div>
+                            <div class="flex-1">
+                                <p class="text-white text-sm">Request backup for patrol route Delta</p>
+                                <p class="text-slate-400 text-xs">Bravo-3 • 8 min ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions justify-end mt-4">
+                        <button class="btn btn-primary btn-sm bg-blue-600 hover:bg-blue-700 border-blue-600">Open Comms</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blockchain Status -->
+            <div class="dashboard-card card bg-slate-800/40 border border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title text-white flex items-center gap-2">
+                            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01"></path>
+                            </svg>
+                            Blockchain Ledger
+                        </h2>
+                        <div class="badge badge-warning badge-sm">Beta</div>
+                    </div>
+                    
+                    <!-- Blockchain Info -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-slate-700/30 rounded-lg">
+                            <span class="text-slate-300 text-sm">Latest Block</span>
+                            <span class="text-white font-mono text-sm">#847,293</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-slate-700/30 rounded-lg">
+                            <span class="text-slate-300 text-sm">Transactions Today</span>
+                            <span class="text-emerald-400 font-bold">1,247</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-slate-700/30 rounded-lg">
+                            <span class="text-slate-300 text-sm">Network Status</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                                <span class="text-emerald-400 text-sm">Synchronized</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions justify-end mt-4">
+                        <button class="btn btn-outline btn-sm border-orange-600 text-orange-400 hover:bg-orange-600">View Ledger</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+            <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Quick Actions
+            </h3>
+            <div class="flex flex-wrap gap-3">
+                <button class="btn btn-outline border-emerald-600 text-emerald-400 hover:bg-emerald-600 hover:text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
+                    </svg>
+                    Add Personnel
+                </button>
+                <button class="btn btn-outline border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    Send Message
+                </button>
+                <button class="btn btn-outline border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Generate Report
+                </button>
+                <a href="{% url 'join' %}" class="btn btn-outline border-orange-600 text-orange-400 hover:bg-orange-600 hover:text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Join Device
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Status Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-sm border-t border-slate-700 p-2 z-40">
+        <div class="max-container">
+            <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-1">
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        <span class="text-emerald-400">System Operational</span>
+                    </div>
+                    <span class="text-slate-400">Last Update: 15:43:27</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-slate-400">Classification: TOP SECRET</span>
+                    <span class="text-slate-500">Session: 04:23:15</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

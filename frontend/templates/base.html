@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SainyaSecure - Military Communication System{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Custom CSS -->
+    <style>
+        /* Military theme customization */
+        :root {
+            --color-primary: #10b981; /* Emerald */
+            --color-secondary: #1e293b; /* Slate */
+            --color-accent: #3b82f6; /* Blue */
+        }
+        
+        .military-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="military-gradient min-h-screen text-white">
+    {% block content %}{% endblock %}
+    
+    <!-- JavaScript -->
+    <script>
+        // Military theme configuration for Tailwind
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'military': {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            900: '#064e3b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

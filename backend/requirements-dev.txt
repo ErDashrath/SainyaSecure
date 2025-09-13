@@ -1,0 +1,45 @@
+# Django Core and REST Framework
+Django==4.2.0
+djangorestframework==3.14.0
+django-cors-headers==4.0.0
+django-filter==23.2
+
+# GraphQL Support
+graphene-django==3.0.0
+
+# Real-time Communications
+channels==4.0.0
+channels-redis==4.1.0
+
+# Database (SQLite for development - no PostgreSQL needed initially)
+django-extensions==3.2.3
+
+# Async Task Queue
+celery==5.2.7
+redis==4.5.5
+
+# Cryptography and Security
+cryptography==40.0.2
+pycryptodome==3.17.0
+PyJWT==2.7.0
+
+# Blockchain Integration
+web3==6.5.1
+eth-account==0.8.0
+
+# AI/ML for Anomaly Detection
+transformers==4.30.2
+torch==2.0.1
+scikit-learn==1.2.2
+numpy==1.24.3
+pandas==2.0.2
+
+# Utilities
+python-dotenv==1.0.0
+pillow==9.5.0
+requests==2.31.0
+websockets==11.0.3
+
+# Development
+django-debug-toolbar==4.1.0
+pytest-django==4.5.2

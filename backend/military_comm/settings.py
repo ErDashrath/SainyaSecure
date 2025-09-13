@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'channels',
+    'tailwind',
+    'army1',
+    'django_browser_reload',
     
     # Local apps for Military Communication System
     'users',           # Soldier/device management, WebAuthn/JWT authentication
@@ -68,7 +71,7 @@ ROOT_URLCONF = 'military_comm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR.parent / 'frontend' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -262,3 +265,11 @@ LOGGING = {
         },
     },
 }
+
+# Tailwind CSS Configuration
+TAILWIND_APP_NAME = 'army1'
+
+# Internal IPs for django-browser-reload
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

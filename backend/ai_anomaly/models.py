@@ -208,7 +208,7 @@ class AnomalyAlert(models.Model):
     risk_factors = models.JSONField(default=list, help_text="Identified risk factors")
     
     # Response and handling
-    status = models.CharField(max_length=12, choices=ALERT_STATUS, default='NEW')
+    status = models.CharField(max_length=15, choices=ALERT_STATUS, default='NEW')
     assigned_to = models.ForeignKey(MilitaryUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_alerts')
     response_actions = models.JSONField(default=list, help_text="Actions taken in response")
     resolution_notes = models.TextField(blank=True)
@@ -425,11 +425,11 @@ class ThreatIntelligence(models.Model):
     
     # Source information
     source_name = models.CharField(max_length=100, help_text="Intelligence source")
-    source_reliability = models.CharField(max_length=8, choices=CONFIDENCE_LEVELS, default='MEDIUM')
+    source_reliability = models.CharField(max_length=10, choices=CONFIDENCE_LEVELS, default='MEDIUM')
     external_references = models.JSONField(default=list, help_text="External reference links")
     
     # Relevance and applicability
-    confidence_level = models.CharField(max_length=9, choices=CONFIDENCE_LEVELS, default='MEDIUM')
+    confidence_level = models.CharField(max_length=10, choices=CONFIDENCE_LEVELS, default='MEDIUM')
     threat_level = models.CharField(max_length=8, choices=AnomalyAlert.SEVERITY_LEVELS, default='MEDIUM')
     applicability_score = models.DecimalField(max_digits=3, decimal_places=2, default=0.5)
     

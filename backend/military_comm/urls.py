@@ -22,6 +22,7 @@ from django.http import JsonResponse
 from django.views.generic import TemplateView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from . import views
 
 
 @api_view(['GET'])
@@ -55,6 +56,12 @@ def api_root(request):
 
 
 urlpatterns = [
+    # Frontend URLs
+    path('', views.index, name='index'),
+    path('login/', views.login_view, name='login'), 
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('join/<str:join_token>/', views.device_join, name='device_join'),
+    
     # Main API root endpoint
     path('api/', api_root, name='api-root'),
     

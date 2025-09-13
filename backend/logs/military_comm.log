@@ -1,0 +1,20 @@
+INFO 2025-09-13 19:03:05,083 autoreload 1612 19620 Watching for file changes with StatReloader
+WARNING 2025-09-13 19:03:09,489 log 1612 7844 Not Found: /
+WARNING 2025-09-13 19:03:09,492 basehttp 1612 7844 "GET / HTTP/1.1" 404 3721
+WARNING 2025-09-13 19:03:09,673 log 1612 7844 Not Found: /favicon.ico
+WARNING 2025-09-13 19:03:09,689 basehttp 1612 7844 "GET /favicon.ico HTTP/1.1" 404 3772
+INFO 2025-09-13 19:03:23,869 autoreload 13360 15596 Watching for file changes with StatReloader
+INFO 2025-09-13 19:06:17,368 autoreload 8236 19596 Watching for file changes with StatReloader
+INFO 2025-09-13 19:08:21,511 autoreload 15980 7700 Watching for file changes with StatReloader
+INFO 2025-09-13 19:19:17,572 autoreload 15980 7700 C:\Users\Dashrath\Desktop\Academic\Hackathons\SainyaSecure\backend\military_comm\urls.py changed, reloading.
+INFO 2025-09-13 19:19:17,572 autoreload 1612 19620 C:\Users\Dashrath\Desktop\Academic\Hackathons\SainyaSecure\backend\users\models.py changed, reloading.
+INFO 2025-09-13 19:19:19,326 autoreload 19308 12120 Watching for file changes with StatReloader
+INFO 2025-09-13 20:46:55,899 autoreload 17124 16472 Watching for file changes with StatReloader
+INFO 2025-09-13 20:46:59,786 basehttp 17124 18020 "GET / HTTP/1.1" 200 15083
+INFO 2025-09-13 20:55:12,894 basehttp 17124 16692 "GET / HTTP/1.1" 200 15083
+INFO 2025-09-13 20:55:22,944 basehttp 17124 16692 "GET /dashboard/ HTTP/1.1" 302 0
+WARNING 2025-09-13 20:55:23,000 log 17124 16692 Not Found: /accounts/login/
+WARNING 2025-09-13 20:55:23,003 basehttp 17124 16692 "GET /accounts/login/?next=/dashboard/ HTTP/1.1" 404 4483
+INFO 2025-09-13 20:55:43,018 basehttp 17124 15144 "GET /dashboard/ HTTP/1.1" 302 0
+WARNING 2025-09-13 20:55:43,027 log 17124 15144 Not Found: /accounts/login/
+WARNING 2025-09-13 20:55:43,028 basehttp 17124 15144 "GET /accounts/login/?next=/dashboard/ HTTP/1.1" 404 4483
